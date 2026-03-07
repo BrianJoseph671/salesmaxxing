@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { getUser } from "@/src/lib/supabase/auth";
+import { getCurrentUserProfile } from "@/src/lib/supabase/user-profiles";
 
 export default async function OverviewPage() {
 	const user = await getUser();
+	const profile = await getCurrentUserProfile();
 
 	if (!user) {
 		redirect("/sign-in?next=/overview");
@@ -54,6 +56,18 @@ export default async function OverviewPage() {
 							null,
 							2,
 						)}
+					</pre>
+				</div>
+				<div className="rounded-3xl border border-white/10 bg-zinc-950 p-8">
+					<h2 className="text-lg font-semibold text-white">
+						user_profiles snapshot
+					</h2>
+					<p className="mt-3 text-sm leading-6 text-zinc-400">
+						This row is populated from Supabase Auth metadata on successful
+						LinkedIn callback.
+					</p>
+					<pre className="mt-4 overflow-x-auto text-sm leading-6 text-zinc-300">
+						{JSON.stringify(profile, null, 2)}
 					</pre>
 				</div>
 			</div>

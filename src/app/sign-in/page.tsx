@@ -18,6 +18,10 @@ function getErrorCopy(error?: string) {
 		return "Missing Supabase configuration in this environment.";
 	}
 
+	if (error === "profile_sync_failed") {
+		return "LinkedIn sign-in succeeded, but profile sync to user_profiles failed.";
+	}
+
 	return null;
 }
 

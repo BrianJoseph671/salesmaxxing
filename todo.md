@@ -405,7 +405,7 @@ User can sign in with LinkedIn and the extension knows who they are.
 - [x] 2.4 — Port Supabase client setup from deathnote (`lib/supabase/`)
 - [x] 2.5 — Build `/auth/callback` route (port from deathnote)
 - [x] 2.6 — Build sign-in page with "Sign in with LinkedIn" button
-- [ ] 2.7 — Store LinkedIn profile meta in `user_profiles` table on first login
+- [x] 2.7 — Store LinkedIn profile meta in `user_profiles` table on first login
 - [ ] 2.8 — Extension popup: detect auth state (check Supabase session via web app)
 - [ ] 2.9 — Extension popup: "Sign in with LinkedIn" button → opens web app auth
 - [ ] 2.10 — After auth callback, pass session token to extension (chrome.storage)

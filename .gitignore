@@ -33,6 +33,9 @@ bun-debug.log*
 .env.local
 .env*.local
 
+# supabase
+supabase/.temp/
+
 # vercel
 .vercel
 

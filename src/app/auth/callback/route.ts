@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { getSafeRedirectPath } from "@/src/lib/supabase/auth";
+import { upsertUserProfile } from "@/src/lib/supabase/user-profiles";
 
 const supabaseUrl =
 	process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -42,6 +43,25 @@ async function handleCallback(request: NextRequest, code: string | null) {
 		const { error } = await supabase.auth.exchangeCodeForSession(code);
 
 		if (!error) {
+			const {
+				data: { user },
+				error: userError,
+			} = await supabase.auth.getUser();
+
+			if (userError || !user) {
+				return NextResponse.redirect(
+					`${origin}/sign-in?error=profile_sync_failed`,
+				);
+			}
+
+			try {
+				await upsertUserProfile(supabase, user);
+			} catch {
+				return NextResponse.redirect(
+					`${origin}/sign-in?error=profile_sync_failed`,
+				);
+			}
+
 			const forwardedHost = request.headers.get("x-forwarded-host");
 			const isLocalEnv = process.env.NODE_ENV === "development";
 
