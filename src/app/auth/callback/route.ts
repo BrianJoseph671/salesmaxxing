@@ -76,7 +76,7 @@ async function handleCallback(request: NextRequest, code: string | null) {
 			}
 
 			if (extensionId) {
-				const extensionBridgeUrl = new URL("/auth/extension", baseUrl);
+				const extensionBridgeUrl = new URL("/extension-auth", baseUrl);
 				extensionBridgeUrl.searchParams.set("extensionId", extensionId);
 				extensionBridgeUrl.searchParams.set("next", next);
 
