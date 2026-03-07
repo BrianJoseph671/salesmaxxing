@@ -7,6 +7,14 @@ const allowedExtensionOrigins = new Set(
 		.filter(Boolean),
 );
 
+function matchesAllowedOrigin(origin: string, allowedOrigin: string) {
+	if (allowedOrigin === "chrome-extension://*") {
+		return origin.startsWith("chrome-extension://");
+	}
+
+	return origin === allowedOrigin;
+}
+
 function isAllowedExtensionOrigin(origin: string) {
 	if (!origin.startsWith("chrome-extension://")) {
 		return false;
@@ -16,7 +24,17 @@ function isAllowedExtensionOrigin(origin: string) {
 		return true;
 	}
 
-	return allowedExtensionOrigins.has(origin);
+	if (allowedExtensionOrigins.size === 0) {
+		return true;
+	}
+
+	for (const allowedOrigin of allowedExtensionOrigins) {
+		if (matchesAllowedOrigin(origin, allowedOrigin)) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 export function applyExtensionCors(

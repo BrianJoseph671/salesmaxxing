@@ -406,8 +406,8 @@ User can sign in with LinkedIn and the extension knows who they are.
 - [x] 2.5 — Build `/auth/callback` route (port from deathnote)
 - [x] 2.6 — Build sign-in page with "Sign in with LinkedIn" button
 - [x] 2.7 — Store LinkedIn profile meta in `user_profiles` table on first login
-- [ ] 2.8 — Extension popup: detect auth state (check Supabase session via web app)
-- [ ] 2.9 — Extension popup: "Sign in with LinkedIn" button → opens web app auth
+- [x] 2.8 — Extension popup: detect auth state (check Supabase session via web app)
+- [x] 2.9 — Extension popup: "Sign in with LinkedIn" button → opens web app auth
 - [ ] 2.10 — After auth callback, pass session token to extension (chrome.storage)
 - [ ] 2.11 — Verify: click extension → sign in → extension shows "Hello, [name]"
 
@@ -442,7 +442,7 @@ Content script can read profile data and connections from LinkedIn pages.
 
 Claude analyzes the user's network and returns ranked leads.
 
-- [ ] 4.1 — Install Vercel AI SDK: `bun add ai @ai-sdk/anthropic`
+- [x] 4.1 — Install Vercel AI SDK: `bun add ai @ai-sdk/anthropic`
 - [ ] 4.2 — Add ANTHROPIC_API_KEY to Vercel env vars
 - [ ] 4.3 — Build `/api/qualify` route (POST, auth-gated via Supabase session)
 - [ ] 4.4 — Write system prompt: sales qualification (what makes a good lead given the user's role)
@@ -461,7 +461,7 @@ Claude analyzes the user's network and returns ranked leads.
 
 The beautiful, always-available side panel that makes this product special.
 
-- [ ] 5.1 — Register side panel in manifest.json
+- [x] 5.1 — Register side panel in manifest.json
 - [ ] 5.2 — Side panel shell: React + Tailwind, dark/premium design language
 - [ ] 5.3 — Onboarding screen 1: "Welcome, [name]" with LinkedIn avatar
 - [ ] 5.4 — Onboarding screen 2: Automatic vs Custom qualification picker
@@ -522,7 +522,7 @@ Leads and intros persist across sessions.
 
 Make it beautiful, test it, package it.
 
-- [ ] 8.1 — Extension icon set (16, 32, 48, 128px)
+- [x] 8.1 — Extension icon set (16, 32, 48, 128px)
 - [ ] 8.2 — Side panel: micro-interactions, hover states, transitions
 - [ ] 8.3 — Side panel: loading skeletons for all async states
 - [ ] 8.4 — Side panel: score visualization (gradient bar, color-coded badge)
