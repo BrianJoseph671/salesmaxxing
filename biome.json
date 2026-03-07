@@ -1,0 +1,105 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.4.6/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignoreUnknown": true,
+		"includes": [
+			"src/**",
+			"extension/**",
+			"scripts/**",
+			"*.ts",
+			"*.tsx",
+			"*.js",
+			"*.json",
+			"*.css"
+		]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"correctness": {
+				"noUnusedVariables": "error",
+				"noUnusedImports": "error",
+				"useExhaustiveDependencies": "error",
+				"noUndeclaredVariables": "error",
+				"noUnreachable": "error",
+				"noConstantCondition": "error",
+				"noEmptyPattern": "error"
+			},
+			"suspicious": {
+				"noExplicitAny": "error",
+				"noArrayIndexKey": "error",
+				"noConsole": "warn",
+				"noDebugger": "error",
+				"noDoubleEquals": "error",
+				"noShadowRestrictedNames": "error",
+				"noAsyncPromiseExecutor": "error",
+				"noConfusingVoidType": "error",
+				"noEmptyBlockStatements": "error"
+			},
+			"style": {
+				"noParameterAssign": "error",
+				"useConst": "error",
+				"noNonNullAssertion": "error",
+				"useImportType": "error",
+				"useTemplate": "error",
+				"useSingleVarDeclarator": "error",
+				"useForOf": "warn"
+			},
+			"security": {
+				"noDangerouslySetInnerHtml": "off"
+			},
+			"complexity": {
+				"noExcessiveCognitiveComplexity": {
+					"level": "error",
+					"options": {
+						"maxAllowedComplexity": 60
+					}
+				},
+				"noForEach": "warn",
+				"noUselessSwitchCase": "error"
+			},
+			"a11y": {
+				"useAltText": "error",
+				"useKeyWithClickEvents": "warn",
+				"useButtonType": "error",
+				"useValidAnchor": "error"
+			},
+			"performance": {
+				"noAccumulatingSpread": "warn",
+				"noDelete": "warn"
+			}
+		}
+	},
+	"javascript": {
+		"globals": ["chrome"],
+		"formatter": {
+			"quoteStyle": "double"
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		},
+		"formatter": {
+			"indentStyle": "tab"
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	}
+}
