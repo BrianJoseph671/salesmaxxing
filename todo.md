@@ -401,7 +401,7 @@ User can sign in with LinkedIn and the extension knows who they are.
 
 - [x] 2.1 — Set up Supabase project (or reuse existing, decide now)
 - [x] 2.2 — Enable LinkedIn OIDC provider in Supabase dashboard
-- [ ] 2.3 — Add env vars to Vercel (SUPABASE_URL, SUPABASE_ANON_KEY, APP_URL)
+- [x] 2.3 — Add env vars to Vercel (SUPABASE_URL, SUPABASE_ANON_KEY, APP_URL)
 - [x] 2.4 — Port Supabase client setup from deathnote (`lib/supabase/`)
 - [x] 2.5 — Build `/auth/callback` route (port from deathnote)
 - [x] 2.6 — Build sign-in page with "Sign in with LinkedIn" button
