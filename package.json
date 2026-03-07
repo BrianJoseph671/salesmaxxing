@@ -9,12 +9,14 @@
 		"dev": "next dev --turbopack",
 		"build": "next build",
 		"start": "next start",
-		"lint": "bunx biome check --write",
-		"lint:check": "bunx biome check",
-		"format": "bunx biome format --write",
-		"check": "bunx biome check && bunx tsc --noEmit",
+		"lint": "bunx biome check .",
+		"lint:fix": "bunx biome check --write .",
+		"format": "bunx biome format --write .",
+		"typecheck": "bunx tsc --noEmit",
+		"check": "bun run lint && bun run typecheck && bun run build && bun run ext:build",
 		"ext:dev": "bun run scripts/build-extension.ts --watch",
-		"ext:build": "bun run scripts/build-extension.ts"
+		"ext:build": "bun run scripts/build-extension.ts",
+		"deploy:prod": "vercel --prod"
 	},
 	"dependencies": {
 		"@supabase/ssr": "^0.9.0",

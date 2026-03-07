@@ -1,8 +1,9 @@
 // Generate placeholder PNG icons for the Chrome extension
 // Uses a simple 1-pixel-per-channel raw PNG encoder
 
-import { writeFileSync, mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { deflateRawSync } from "node:zlib";
 
 const iconsDir = resolve(import.meta.dir, "../extension/icons");
 mkdirSync(iconsDir, { recursive: true });
@@ -50,8 +51,7 @@ function createPNG(size: number): Buffer {
 			const dy = y - cy;
 
 			// Simple S shape: top arc right, bottom arc left
-			const inCenter =
-				Math.abs(dx) < r * 0.7 && Math.abs(dy) < r * 0.15;
+			const inCenter = Math.abs(dx) < r * 0.7 && Math.abs(dy) < r * 0.15;
 			const inTop =
 				dy < 0 &&
 				dy > -r * 0.6 &&
@@ -83,8 +83,8 @@ function createPNG(size: number): Buffer {
 
 	function crc32(buf: Buffer): number {
 		let c = 0xffffffff;
-		for (let i = 0; i < buf.length; i++) {
-			c ^= buf[i];
+		for (const byte of buf) {
+			c ^= byte;
 			for (let j = 0; j < 8; j++) {
 				c = (c >>> 1) ^ (c & 1 ? 0xedb88320 : 0);
 			}
@@ -121,8 +121,7 @@ function createPNG(size: number): Buffer {
 		}
 	}
 
-	// Use Bun's zlib
-	const deflated = Buffer.from(Bun.deflateSync(rawData, { level: 6 }));
+	const deflated = deflateRawSync(rawData, { level: 6 });
 
 	// Wrap in zlib format (header + deflated + adler32)
 	const zlibHeader = Buffer.from([0x78, 0x9c]);
@@ -130,8 +129,8 @@ function createPNG(size: number): Buffer {
 	// Adler32
 	let a = 1;
 	let b = 0;
-	for (let i = 0; i < rawData.length; i++) {
-		a = (a + rawData[i]) % 65521;
+	for (const value of rawData) {
+		a = (a + value) % 65521;
 		b = (b + a) % 65521;
 	}
 	const adler = Buffer.alloc(4);

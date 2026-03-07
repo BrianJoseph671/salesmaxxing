@@ -388,8 +388,8 @@ Get the monorepo structure running with both the web app and extension building.
 - [x] 1.6 — Create minimal content script (logs "SalesMAXXing loaded" on linkedin.com)
 - [x] 1.7 — Create background service worker (empty shell)
 - [x] 1.8 — Add extension build script (Bun bundler, outputs to `/extension/dist`)
-- [ ] 1.9 — Load unpacked extension in Chrome, verify popup + content script work
-- [ ] 1.10 — Deploy empty Next.js app to Vercel
+- [x] 1.9 — Load unpacked extension in Chrome, verify popup + content script work
+- [x] 1.10 — Deploy empty Next.js app to Vercel
 
 **Checkpoint: Extension loads in Chrome. Web app deploys to Vercel.**
 
@@ -399,12 +399,12 @@ Get the monorepo structure running with both the web app and extension building.
 
 User can sign in with LinkedIn and the extension knows who they are.
 
-- [ ] 2.1 — Set up Supabase project (or reuse existing, decide now)
-- [ ] 2.2 — Enable LinkedIn OIDC provider in Supabase dashboard
+- [x] 2.1 — Set up Supabase project (or reuse existing, decide now)
+- [x] 2.2 — Enable LinkedIn OIDC provider in Supabase dashboard
 - [ ] 2.3 — Add env vars to Vercel (SUPABASE_URL, SUPABASE_ANON_KEY, APP_URL)
-- [ ] 2.4 — Port Supabase client setup from deathnote (`lib/supabase/`)
-- [ ] 2.5 — Build `/auth/callback` route (port from deathnote)
-- [ ] 2.6 — Build sign-in page with "Sign in with LinkedIn" button
+- [x] 2.4 — Port Supabase client setup from deathnote (`lib/supabase/`)
+- [x] 2.5 — Build `/auth/callback` route (port from deathnote)
+- [x] 2.6 — Build sign-in page with "Sign in with LinkedIn" button
 - [ ] 2.7 — Store LinkedIn profile meta in `user_profiles` table on first login
 - [ ] 2.8 — Extension popup: detect auth state (check Supabase session via web app)
 - [ ] 2.9 — Extension popup: "Sign in with LinkedIn" button → opens web app auth

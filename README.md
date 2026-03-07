@@ -38,20 +38,29 @@ bun install
 # Run Next.js dev server
 bun run dev
 
+# Run full repo checks
+bun run check
+
 # Build Chrome extension
 bun run ext:build
 
 # Build Chrome extension (watch mode)
 bun run ext:dev
 
-# Lint + format
+# Lint
 bun run lint
 
+# Auto-fix lint issues
+bun run lint:fix
+
 # Typecheck
-bunx tsc --noEmit
+bun run typecheck
 
 # Production build
 bun run build
+
+# Deploy to Vercel production
+bun run deploy:prod
 ```
 
 ### Loading the Extension
