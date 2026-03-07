@@ -15,6 +15,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const verifiedSupabaseUrl: string = supabaseUrl;
 const verifiedSupabaseAnonKey: string = supabaseAnonKey;
+const chromeExtensionIdPattern = /^[a-p]{32}$/;
 
 export function getSafeRedirectPath(
 	redirectTo: string | null | undefined,
@@ -41,6 +42,17 @@ export function getAppUrl(requestUrl?: string) {
 	}
 
 	return "http://localhost:3000";
+}
+
+export function getSafeExtensionId(extensionId: string | null | undefined) {
+	if (!extensionId) {
+		return null;
+	}
+
+	const trimmedExtensionId = extensionId.trim();
+	return chromeExtensionIdPattern.test(trimmedExtensionId)
+		? trimmedExtensionId
+		: null;
 }
 
 export async function createRlsServerClient() {

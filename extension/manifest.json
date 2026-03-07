@@ -6,7 +6,7 @@
 	"permissions": ["activeTab", "storage", "sidePanel"],
 	"host_permissions": [
 		"https://*.linkedin.com/*",
-		"http://localhost:3000/*",
+		"http://localhost/*",
 		"https://salesmaxxing.vercel.app/*"
 	],
 	"action": {
@@ -24,6 +24,9 @@
 	"background": {
 		"service_worker": "background.js",
 		"type": "module"
+	},
+	"externally_connectable": {
+		"matches": ["http://localhost/*", "https://salesmaxxing.vercel.app/*"]
 	},
 	"content_scripts": [
 		{

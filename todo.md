@@ -252,18 +252,18 @@ Key mitigations: dynamic URL in manifest, human-speed interactions, read-only be
 ## Tasks
 
 ### Setup
-- [ ] Initialize Next.js 16 project with Bun, Biome, Tailwind 4
-- [ ] Configure Supabase project (reuse existing or new)
-- [ ] Set up Vercel project + deployment
-- [ ] Create Chrome extension scaffold (Manifest V3)
-- [ ] Configure `"use_dynamic_url": true` in manifest web_accessible_resources
+- [x] Initialize Next.js 16 project with Bun, Biome, Tailwind 4
+- [x] Configure Supabase project (reuse existing or new)
+- [x] Set up Vercel project + deployment
+- [x] Create Chrome extension scaffold (Manifest V3)
+- [x] Configure `"use_dynamic_url": true` in manifest web_accessible_resources
 
 ### Auth
-- [ ] Implement Supabase LinkedIn OIDC sign-in (port from deathnote)
-- [ ] OAuth callback route with redirect back to extension
-- [ ] Store user profile meta in Supabase on first login
-- [ ] Auth state sync between web app and Chrome extension (token in chrome.storage)
-- [ ] Extension popup: login state detection + redirect to auth
+- [x] Implement Supabase LinkedIn OIDC sign-in (port from deathnote)
+- [x] OAuth callback route with redirect back to extension
+- [x] Store user profile meta in Supabase on first login
+- [x] Auth state sync between web app and Chrome extension (cookie-based via /api/auth/status CORS)
+- [x] Extension popup: login state detection + redirect to auth
 
 ### Chrome Extension — Content Script
 - [ ] LinkedIn profile page detection (URL pattern + MutationObserver)
@@ -274,7 +274,7 @@ Key mitigations: dynamic URL in manifest, human-speed interactions, read-only be
 - [ ] Message passing to background service worker
 
 ### Chrome Extension — Side Panel UI
-- [ ] Side panel registration and shell
+- [x] Side panel registration and shell
 - [ ] Onboarding flow: Automatic vs Custom qualification choice
 - [ ] Custom qualification form (keywords, URLs, ICP notes, industry filters)
 - [ ] Lead card component (score badge, expandable justification, profile highlights)
@@ -290,7 +290,7 @@ Key mitigations: dynamic URL in manifest, human-speed interactions, read-only be
 - [ ] Coordination of multi-page extraction (profile + connections)
 
 ### AI — Lead Qualification
-- [ ] Vercel AI SDK setup with @ai-sdk/anthropic
+- [x] Vercel AI SDK setup with @ai-sdk/anthropic
 - [ ] `/api/qualify` route (auth-gated, rate-limited)
 - [ ] System prompt: sales qualification methodology (BANT, MEDDIC, or custom)
 - [ ] Automatic mode: user profile → infer what they sell → rank connections
@@ -306,7 +306,7 @@ Key mitigations: dynamic URL in manifest, human-speed interactions, read-only be
 - [ ] Tone/style options (warm intro, cold outreach, mutual connection reference)
 
 ### Database (Supabase)
-- [ ] `user_profiles` table (rep meta, job context, value prop, LinkedIn data)
+- [x] `user_profiles` table (rep meta, job context, value prop, LinkedIn data)
 - [ ] `qualification_configs` table (custom keywords, URLs, ICP, industry)
 - [ ] `leads` table (extracted profile data, score, justification, status)
 - [ ] `intros` table (generated InMails, lead FK, version history)
@@ -320,7 +320,7 @@ Key mitigations: dynamic URL in manifest, human-speed interactions, read-only be
 - [ ] Side panel: InMail composer with real-time AI streaming
 - [ ] Side panel: onboarding screens (auth, mode selection, loading)
 - [ ] Micro-interactions: hover states, transitions, loading skeletons
-- [ ] Extension popup: minimal, branded entry point
+- [x] Extension popup: minimal, branded entry point
 
 ---
 
@@ -408,7 +408,7 @@ User can sign in with LinkedIn and the extension knows who they are.
 - [x] 2.7 — Store LinkedIn profile meta in `user_profiles` table on first login
 - [x] 2.8 — Extension popup: detect auth state (check Supabase session via web app)
 - [x] 2.9 — Extension popup: "Sign in with LinkedIn" button → opens web app auth
-- [ ] 2.10 — After auth callback, pass session token to extension (chrome.storage)
+- [x] 2.10 — After auth callback, pass session token to extension (chrome.storage)
 - [ ] 2.11 — Verify: click extension → sign in → extension shows "Hello, [name]"
 
 **Checkpoint: Full LinkedIn sign-in works from the extension.**

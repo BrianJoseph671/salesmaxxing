@@ -1,7 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-import { getSafeRedirectPath } from "@/src/lib/supabase/auth";
+import {
+	getSafeExtensionId,
+	getSafeRedirectPath,
+} from "@/src/lib/supabase/auth";
 import { upsertUserProfile } from "@/src/lib/supabase/user-profiles";
 
 const supabaseUrl =
@@ -13,11 +16,23 @@ async function handleCallback(request: NextRequest, code: string | null) {
 	const requestUrl = new URL(request.url);
 	const origin = requestUrl.origin;
 	const next = getSafeRedirectPath(requestUrl.searchParams.get("next"));
+	const extensionId = getSafeExtensionId(
+		requestUrl.searchParams.get("extensionId"),
+	);
+	const forwardedHost = request.headers.get("x-forwarded-host");
+	const isLocalEnv = process.env.NODE_ENV === "development";
+	const baseUrl =
+		!isLocalEnv && forwardedHost ? `https://${forwardedHost}` : origin;
+	const signInUrl = new URL("/sign-in", baseUrl);
+	signInUrl.searchParams.set("next", next);
+
+	if (extensionId) {
+		signInUrl.searchParams.set("extensionId", extensionId);
+	}
 
 	if (!supabaseUrl || !supabaseAnonKey) {
-		return NextResponse.redirect(
-			`${origin}/sign-in?error=missing_supabase_config`,
-		);
+		signInUrl.searchParams.set("error", "missing_supabase_config");
+		return NextResponse.redirect(signInUrl);
 	}
 
 	if (code) {
@@ -49,35 +64,31 @@ async function handleCallback(request: NextRequest, code: string | null) {
 			} = await supabase.auth.getUser();
 
 			if (userError || !user) {
-				return NextResponse.redirect(
-					`${origin}/sign-in?error=profile_sync_failed`,
-				);
+				signInUrl.searchParams.set("error", "profile_sync_failed");
+				return NextResponse.redirect(signInUrl);
 			}
 
 			try {
 				await upsertUserProfile(supabase, user);
 			} catch {
-				return NextResponse.redirect(
-					`${origin}/sign-in?error=profile_sync_failed`,
-				);
+				signInUrl.searchParams.set("error", "profile_sync_failed");
+				return NextResponse.redirect(signInUrl);
 			}
 
-			const forwardedHost = request.headers.get("x-forwarded-host");
-			const isLocalEnv = process.env.NODE_ENV === "development";
+			if (extensionId) {
+				const extensionBridgeUrl = new URL("/auth/extension", baseUrl);
+				extensionBridgeUrl.searchParams.set("extensionId", extensionId);
+				extensionBridgeUrl.searchParams.set("next", next);
 
-			if (isLocalEnv) {
-				return NextResponse.redirect(`${origin}${next}`);
+				return NextResponse.redirect(extensionBridgeUrl);
 			}
 
-			if (forwardedHost) {
-				return NextResponse.redirect(`https://${forwardedHost}${next}`);
-			}
-
-			return NextResponse.redirect(`${origin}${next}`);
+			return NextResponse.redirect(`${baseUrl}${next}`);
 		}
 	}
 
-	return NextResponse.redirect(`${origin}/sign-in?error=auth_callback_failed`);
+	signInUrl.searchParams.set("error", "auth_callback_failed");
+	return NextResponse.redirect(signInUrl);
 }
 
 export async function GET(request: NextRequest) {

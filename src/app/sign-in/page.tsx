@@ -1,6 +1,7 @@
 type SignInPageProps = {
 	searchParams?: Promise<{
 		error?: string;
+		extensionId?: string;
 		next?: string;
 	}>;
 };
@@ -29,7 +30,17 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 	const params = searchParams ? await searchParams : undefined;
 	const next = params?.next || "/overview";
 	const error = getErrorCopy(params?.error);
-	const authHref = `/auth/linkedin?next=${encodeURIComponent(next)}`;
+	const extensionId =
+		typeof params?.extensionId === "string" ? params.extensionId : undefined;
+	const authSearchParams = new URLSearchParams({
+		next,
+	});
+
+	if (extensionId) {
+		authSearchParams.set("extensionId", extensionId);
+	}
+
+	const authHref = `/auth/linkedin?${authSearchParams.toString()}`;
 
 	return (
 		<main className="flex min-h-screen items-center bg-black px-6 py-16 text-white">
@@ -44,6 +55,12 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 					This flow reuses the existing DeathNote Supabase project for speed
 					while we validate the extension and lead qualification flow.
 				</p>
+				{extensionId ? (
+					<p className="mt-4 text-sm leading-6 text-zinc-500">
+						After LinkedIn returns, SalesMAXXing will sync your session back to
+						the extension automatically.
+					</p>
+				) : null}
 				{error ? (
 					<p className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
 						{error}
@@ -64,7 +81,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 					</a>
 				</div>
 				<p className="mt-6 text-sm text-zinc-500">
-					After LinkedIn returns, you will land on <code>/overview</code>.
+					After LinkedIn returns, you will land on <code>{next}</code>.
 				</p>
 			</div>
 		</main>

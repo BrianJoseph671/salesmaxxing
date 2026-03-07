@@ -15,11 +15,23 @@ type ActiveTabState = {
 type AuthStatus = {
 	appUrl: string;
 	isAuthenticated: boolean;
+	source: "extension" | "web";
 	user: {
 		email: string | null;
 		id: string;
 		name: string | null;
 	} | null;
+};
+
+type StoredExtensionSession = {
+	accessToken: string;
+	appUrl: string;
+	expiresAt: number | null;
+	expiresIn: number | null;
+	refreshToken: string;
+	syncedAt: string;
+	tokenType: string;
+	user: AuthStatus["user"];
 };
 
 async function fetchJsonWithTimeout(input: string, timeoutMs: number) {
@@ -56,11 +68,51 @@ async function probeAuthStatus(appUrl: string): Promise<AuthStatus | null> {
 		return {
 			appUrl,
 			isAuthenticated: payload.isAuthenticated === true,
+			source: "web",
 			user: payload.user ?? null,
 		};
 	} catch {
 		return null;
 	}
+}
+
+function isStoredExtensionSession(
+	value: unknown,
+): value is StoredExtensionSession {
+	if (!value || typeof value !== "object") {
+		return false;
+	}
+
+	const candidate = value as Partial<StoredExtensionSession>;
+	return (
+		typeof candidate.accessToken === "string" &&
+		typeof candidate.appUrl === "string" &&
+		typeof candidate.refreshToken === "string" &&
+		typeof candidate.user?.id === "string"
+	);
+}
+
+async function readStoredAuthStatus(): Promise<AuthStatus | null> {
+	const { authSession } = await chrome.storage.local.get("authSession");
+
+	if (!isStoredExtensionSession(authSession)) {
+		return null;
+	}
+
+	if (
+		typeof authSession.expiresAt === "number" &&
+		authSession.expiresAt * 1000 <= Date.now()
+	) {
+		await chrome.storage.local.remove("authSession");
+		return null;
+	}
+
+	return {
+		appUrl: authSession.appUrl,
+		isAuthenticated: true,
+		source: "extension",
+		user: authSession.user,
+	};
 }
 
 function Popup() {
@@ -75,17 +127,19 @@ function Popup() {
 	useEffect(() => {
 		const loadPopupState = async () => {
 			try {
-				const [tabs, authCandidates] = await Promise.all([
+				const [tabs, authCandidates, storedAuthStatus] = await Promise.all([
 					chrome.tabs.query({
 						active: true,
 						currentWindow: true,
 					}),
 					Promise.all(APP_URL_CANDIDATES.map(probeAuthStatus)),
+					readStoredAuthStatus(),
 				]);
 				const tab = tabs[0];
 				const url = tab?.url;
 				const authResult =
 					authCandidates.find((candidate) => candidate?.isAuthenticated) ??
+					storedAuthStatus ??
 					authCandidates.find((candidate) => candidate) ??
 					null;
 
@@ -110,7 +164,13 @@ function Popup() {
 		setError(null);
 
 		if (!authStatus?.isAuthenticated) {
-			const authUrl = `${authStatus?.appUrl ?? "https://salesmaxxing.vercel.app"}/sign-in?next=%2Foverview`;
+			const signInUrl = new URL(
+				"/sign-in",
+				authStatus?.appUrl ?? "https://salesmaxxing.vercel.app",
+			);
+			signInUrl.searchParams.set("next", "/overview");
+			signInUrl.searchParams.set("extensionId", chrome.runtime.id);
+			const authUrl = signInUrl.toString();
 			await chrome.tabs.create({ url: authUrl });
 			window.close();
 			return;
@@ -143,6 +203,10 @@ function Popup() {
 	const isAuthenticated = authStatus?.isAuthenticated === true;
 	const displayName =
 		authStatus?.user?.name ?? authStatus?.user?.email ?? "LinkedIn user";
+	const authSourceCopy =
+		authStatus?.source === "extension"
+			? "Using the session stored in the extension."
+			: "Using the current web app session.";
 	const buttonLabel = isAuthLoading
 		? "Checking session..."
 		: !isAuthenticated
@@ -212,7 +276,7 @@ function Popup() {
 						? activeTab.isLinkedIn
 							? "Open the side panel on your current LinkedIn tab."
 							: "You are signed in. Switch to LinkedIn and reopen the panel."
-						: "This opens the web app sign-in flow. When you come back, the popup will detect the session automatically."}
+						: "This opens the web app sign-in flow. When the callback finishes, SalesMAXXing will sync the session into the extension automatically."}
 			</p>
 			{error ? (
 				<p
@@ -237,6 +301,18 @@ function Popup() {
 					}}
 				>
 					Auth origin: {authStatus.appUrl}
+				</p>
+			) : null}
+			{isAuthenticated ? (
+				<p
+					style={{
+						fontSize: 11,
+						color: "#52525b",
+						marginTop: 12,
+						lineHeight: 1.5,
+					}}
+				>
+					{authSourceCopy}
 				</p>
 			) : null}
 			{activeTab.url ? (
