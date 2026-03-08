@@ -11,6 +11,10 @@ import { ErrorBoundary } from "./sidepanel/components/ErrorBoundary";
 
 const LINKEDIN_CONNECTIONS_URL =
 	"https://www.linkedin.com/mynetwork/invite-connect/connections/";
+const WORKSPACE_URL = chrome.runtime.getURL("sidepanel.html");
+const WORKSPACE_WINDOW_WIDTH = 1280;
+const WORKSPACE_WINDOW_HEIGHT = 920;
+const TARGET_LINKEDIN_TAB_ID_KEY = "targetLinkedInTabId";
 
 type ActiveTabState = {
 	id?: number;
@@ -26,6 +30,19 @@ function Popup() {
 	const [isAuthLoading, setIsAuthLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [isOpening, setIsOpening] = useState(false);
+
+	const openWorkspaceWindow = async (tabId: number) => {
+		await chrome.storage.local.set({
+			[TARGET_LINKEDIN_TAB_ID_KEY]: tabId,
+		});
+		await chrome.windows.create({
+			focused: true,
+			height: WORKSPACE_WINDOW_HEIGHT,
+			type: "popup",
+			url: WORKSPACE_URL,
+			width: WORKSPACE_WINDOW_WIDTH,
+		});
+	};
 
 	useEffect(() => {
 		const loadPopupState = async () => {
@@ -84,7 +101,13 @@ function Popup() {
 		}
 
 		if (!activeTab.isLinkedIn) {
-			await chrome.tabs.create({ url: LINKEDIN_CONNECTIONS_URL });
+			const linkedinTab = await chrome.tabs.create({
+				active: true,
+				url: LINKEDIN_CONNECTIONS_URL,
+			});
+			if (linkedinTab.id) {
+				await openWorkspaceWindow(linkedinTab.id);
+			}
 			window.close();
 			return;
 		}
@@ -113,11 +136,11 @@ function Popup() {
 				setAuthStatus(syncedAuthStatus);
 			}
 
-			await chrome.sidePanel.open({ tabId: activeTab.id });
+			await openWorkspaceWindow(activeTab.id);
 			window.close();
 		} catch {
 			setError(
-				"Could not open the side panel. Reload the extension and try again.",
+				"Could not open the SalesMAXXing workspace. Reload the extension and try again.",
 			);
 			setIsOpening(false);
 		}
@@ -137,14 +160,14 @@ function Popup() {
 			: isOpening
 				? "Opening..."
 				: activeTab.isLinkedIn
-					? "Open Lead Panel"
-					: "Open LinkedIn Connections";
+					? "Open Workspace"
+					: "Open LinkedIn + Workspace";
 	const buttonDisabled = isAuthLoading || isOpening;
 
 	return (
 		<div
 			style={{
-				width: 320,
+				width: 360,
 				padding: 24,
 				fontFamily: "system-ui, -apple-system, sans-serif",
 				background: "#000",
@@ -164,7 +187,7 @@ function Popup() {
 					? "Checking your SalesMAXXing session..."
 					: isAuthenticated
 						? `Signed in as ${displayName}.`
-						: "Sign in to SalesMAXXing, then open your LinkedIn lead panel here."}
+						: "Sign in to SalesMAXXing, then launch your LinkedIn workspace here."}
 			</p>
 			<button
 				onClick={() => void handlePrimaryAction()}
@@ -197,8 +220,8 @@ function Popup() {
 					? "Checking your current sign-in status."
 					: isAuthenticated
 						? activeTab.isLinkedIn
-							? "Open the side panel on your current LinkedIn tab."
-							: "Open your LinkedIn connections page, then launch the side panel."
+							? "Open the full SalesMAXXing workspace for your current LinkedIn tab."
+							: "Open your LinkedIn connections page and launch the full SalesMAXXing workspace."
 						: "This opens the SalesMAXXing sign-in flow and connects the extension automatically."}
 			</p>
 			{error ? (

@@ -29,6 +29,7 @@ type StoredExtensionSession = {
 const allowedExternalOrigins = new Set(["https://salesmaxxing.vercel.app"]);
 const LINKEDIN_CONNECTIONS_URL =
 	"https://www.linkedin.com/mynetwork/invite-connect/connections/";
+const TARGET_LINKEDIN_TAB_ID_KEY = "targetLinkedInTabId";
 const TAB_READY_TIMEOUT_MS = 20000;
 const MESSAGE_RETRY_DELAY_MS = 400;
 const MAX_MESSAGE_ATTEMPTS = 12;
@@ -156,19 +157,77 @@ function sleep(ms: number): Promise<void> {
 	});
 }
 
-async function getActiveLinkedInTab(): Promise<chrome.tabs.Tab> {
-	const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-	const tab = tabs[0];
+async function setTargetLinkedInTabId(tabId: number | null) {
+	if (typeof tabId === "number") {
+		await chrome.storage.local.set({
+			[TARGET_LINKEDIN_TAB_ID_KEY]: tabId,
+		});
+		return;
+	}
 
-	if (!tab?.id) {
+	await chrome.storage.local.remove(TARGET_LINKEDIN_TAB_ID_KEY);
+}
+
+async function getStoredTargetLinkedInTab(): Promise<chrome.tabs.Tab | null> {
+	const result = await chrome.storage.local.get(TARGET_LINKEDIN_TAB_ID_KEY);
+	const tabId: unknown = result[TARGET_LINKEDIN_TAB_ID_KEY];
+
+	if (typeof tabId !== "number") {
+		return null;
+	}
+
+	try {
+		const tab = await chrome.tabs.get(tabId);
+		if (!tab.id || !isLinkedInUrl(tab.url)) {
+			await setTargetLinkedInTabId(null);
+			return null;
+		}
+
+		return tab;
+	} catch {
+		await setTargetLinkedInTabId(null);
+		return null;
+	}
+}
+
+async function getActiveLinkedInTab(): Promise<chrome.tabs.Tab> {
+	const storedTab = await getStoredTargetLinkedInTab();
+	if (storedTab?.id) {
+		return storedTab;
+	}
+
+	const activeTabs = await chrome.tabs.query({
+		active: true,
+		lastFocusedWindow: true,
+	});
+	const activeTab = activeTabs[0];
+
+	if (activeTab?.id && isLinkedInUrl(activeTab.url)) {
+		await setTargetLinkedInTabId(activeTab.id);
+		return activeTab;
+	}
+
+	const linkedinTabs = await chrome.tabs.query({
+		url: ["https://*.linkedin.com/*", "https://linkedin.com/*"],
+	});
+	const fallbackTab = linkedinTabs.find(
+		(tab) => tab.id && isLinkedInUrl(tab.url),
+	);
+	if (fallbackTab?.id) {
+		await setTargetLinkedInTabId(fallbackTab.id);
+		return fallbackTab;
+	}
+
+	if (!activeTab?.id) {
 		throw new Error("No active tab found.");
 	}
 
-	if (!isLinkedInUrl(tab.url)) {
+	if (!isLinkedInUrl(activeTab.url)) {
 		throw new Error("Open LinkedIn in the current tab and try again.");
 	}
 
-	return tab;
+	await setTargetLinkedInTabId(activeTab.id);
+	return activeTab;
 }
 
 async function waitForTabReady(
@@ -211,6 +270,7 @@ async function updateTabAndWait(
 	url: string,
 	urlCheck: (url: string | undefined) => boolean,
 ): Promise<chrome.tabs.Tab> {
+	await setTargetLinkedInTabId(tabId);
 	await chrome.tabs.update(tabId, { url });
 	return waitForTabReady(tabId, urlCheck);
 }
@@ -325,6 +385,15 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onStartup.addListener(() => {
 	// biome-ignore lint/suspicious/noConsole: service worker boot logging
 	console.log("[SalesMAXXing] Background service worker started");
+});
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+	void (async () => {
+		const result = await chrome.storage.local.get(TARGET_LINKEDIN_TAB_ID_KEY);
+		if (result[TARGET_LINKEDIN_TAB_ID_KEY] === tabId) {
+			await setTargetLinkedInTabId(null);
+		}
+	})();
 });
 
 chrome.runtime.onMessageExternal.addListener(

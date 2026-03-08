@@ -8,34 +8,16 @@ const allowedExtensionOrigins = new Set(
 		.filter(Boolean),
 );
 
-function matchesAllowedOrigin(origin: string, allowedOrigin: string) {
-	if (allowedOrigin === "chrome-extension://*") {
-		return origin.startsWith("chrome-extension://");
-	}
-
-	return origin === allowedOrigin;
-}
-
 function isAllowedExtensionOrigin(origin: string) {
 	if (!origin.startsWith("chrome-extension://")) {
 		return false;
 	}
 
-	if (process.env.NODE_ENV === "development") {
-		return true;
-	}
-
 	if (allowedExtensionOrigins.size === 0) {
-		return true;
+		return false;
 	}
 
-	for (const allowedOrigin of allowedExtensionOrigins) {
-		if (matchesAllowedOrigin(origin, allowedOrigin)) {
-			return true;
-		}
-	}
-
-	return false;
+	return allowedExtensionOrigins.has(origin);
 }
 
 export function applyExtensionCors(

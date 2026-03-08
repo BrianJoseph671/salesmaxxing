@@ -29,9 +29,11 @@ async function handleCallback(request: NextRequest, code: string | null) {
 			pendingOAuthState?.extensionId,
 	);
 	const forwardedHost = request.headers.get("x-forwarded-host");
-	const isLocalEnv = process.env.NODE_ENV === "development";
+	const forwardedProto = request.headers.get("x-forwarded-proto");
 	const baseUrl =
-		!isLocalEnv && forwardedHost ? `https://${forwardedHost}` : origin;
+		forwardedHost && forwardedProto
+			? `${forwardedProto}://${forwardedHost}`
+			: origin;
 	const signInUrl = new URL("/sign-in", baseUrl);
 	signInUrl.searchParams.set("next", next);
 

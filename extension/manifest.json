@@ -2,8 +2,9 @@
 	"manifest_version": 3,
 	"name": "SalesMAXXing",
 	"version": "0.1.0",
+	"key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxM6CIICFVzU5zfZDUrmtE6/QK1XgN16kqmLk3oKubEvxUC/5fKjwToQMWJIlj9lBe6tEjkn865UN/O4ipUBL2nzDyFjEY3zfNVrEFOzuDomnNj5kEF74FxZf/c/1Sa1s1HOfDTbYcWzpBPjupLhIuFjMwL/q2wnl5zAmJJkKPYYtpQ/aR26wXOvIkgRKqBOutyZNVBG5RVuVYVSqRkdmCsZh2RIu75GYEo5MExvpwY1pIRkMW/64CE+aEpMWXxJBbVd/MEANyFz76FYea8T/So+iXs0KROJP/MaM4R6RiggoOb21Sqgc3ZGoJJjZoz19CEcQXxsgLadEQzibm8US9wIDAQAB",
 	"description": "AI-powered lead qualification from your LinkedIn network.",
-	"permissions": ["activeTab", "storage", "sidePanel"],
+	"permissions": ["activeTab", "storage"],
 	"host_permissions": [
 		"https://*.linkedin.com/*",
 		"https://salesmaxxing.vercel.app/*"
@@ -16,9 +17,6 @@
 			"48": "icons/icon-48.png",
 			"128": "icons/icon-128.png"
 		}
-	},
-	"side_panel": {
-		"default_path": "sidepanel.html"
 	},
 	"background": {
 		"service_worker": "background.js",

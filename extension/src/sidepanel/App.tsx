@@ -46,6 +46,12 @@ export function App() {
 	const [view, setView] = useState<SidePanelView>("loading");
 	const [composerLead, setComposerLead] = useState<QualifiedLead | null>(null);
 	const [qualError, setQualError] = useState<string | null>(null);
+	const errorType = !user
+		? "auth-expired"
+		: qualError?.toLowerCase().includes("qualification failed") ||
+				qualError?.toLowerCase().includes("ai provider")
+			? "api-error"
+			: "extraction-failed";
 
 	const handleQualificationComplete = useCallback(
 		(newLeads: QualifiedLead[]) => {
@@ -213,7 +219,7 @@ export function App() {
 				return (
 					<ErrorState
 						message={qualError ?? "Sign in to SalesMAXXing to get started."}
-						type={user ? "extraction-failed" : "auth-expired"}
+						type={errorType}
 						onSignIn={user ? undefined : handleSignIn}
 						onRetry={handleRetry}
 					/>

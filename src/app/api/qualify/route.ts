@@ -94,13 +94,16 @@ export async function POST(request: NextRequest) {
 			NextResponse.json(result.object),
 			"POST,OPTIONS",
 		);
-	} catch {
+	} catch (error) {
+		const message =
+			error instanceof Error ? error.message : "Failed to qualify connections";
+		const status = message.includes("AI provider is not configured")
+			? 503
+			: 500;
+
 		return applyExtensionCors(
 			request,
-			NextResponse.json(
-				{ error: "Failed to qualify connections" },
-				{ status: 500 },
-			),
+			NextResponse.json({ error: message }, { status }),
 			"POST,OPTIONS",
 		);
 	}

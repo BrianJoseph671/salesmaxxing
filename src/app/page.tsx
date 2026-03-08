@@ -176,7 +176,7 @@ const features = [
 	{
 		title: "Lives inside LinkedIn",
 		description:
-			"A side panel that stays with you as you browse. No tab-switching, no context loss.",
+			"A dedicated workspace that stays connected to LinkedIn while you browse, rank leads, and draft outreach.",
 	},
 	{
 		title: "Two modes",
