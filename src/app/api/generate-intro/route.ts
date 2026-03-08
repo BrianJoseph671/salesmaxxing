@@ -5,7 +5,7 @@ import {
 	applyExtensionCors,
 	createExtensionPreflightResponse,
 } from "@/src/lib/http/cors";
-import { getUser } from "@/src/lib/supabase/auth";
+import { getUserFromRequest } from "@/src/lib/supabase/auth";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -147,7 +147,7 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
 	try {
-		const user = await getUser();
+		const user = await getUserFromRequest(request);
 		if (!user) {
 			const response = NextResponse.json(
 				{ error: "Authentication required" },

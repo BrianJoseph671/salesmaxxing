@@ -103,3 +103,40 @@ export async function getUser() {
 
 	return user;
 }
+
+/**
+ * Get the authenticated user from either cookies (web app) or a Bearer token
+ * (Chrome extension). Call this from API routes that serve both contexts.
+ */
+export async function getUserFromRequest(request: Request) {
+	// Try Bearer token first (Chrome extension sends this)
+	const authHeader = request.headers.get("authorization");
+	if (authHeader?.startsWith("Bearer ")) {
+		const token = authHeader.slice(7);
+		const supabase = createSupabaseServerClient(
+			verifiedSupabaseUrl,
+			verifiedSupabaseAnonKey,
+			{
+				cookies: {
+					getAll() {
+						return [];
+					},
+					setAll() {
+						// no-op for token-based auth
+					},
+				},
+				global: {
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			},
+		);
+		const {
+			data: { user },
+			error,
+		} = await supabase.auth.getUser(token);
+		if (!error && user) return user;
+	}
+
+	// Fall back to cookie-based auth (web app)
+	return getUser();
+}
