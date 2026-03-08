@@ -5,6 +5,7 @@ export const metadata: Metadata = {
 	title: "SalesMAXXing Agent",
 	description:
 		"AI-powered lead qualification from your LinkedIn network. Any rep can qualify with confidence.",
+	metadataBase: new URL("https://salesmaxxing.vercel.app"),
 	openGraph: {
 		title: "SalesMAXXing Agent",
 		description: "AI-powered lead qualification from your LinkedIn network.",

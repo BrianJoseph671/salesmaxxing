@@ -15,10 +15,12 @@ dist
 
 # extension build output
 extension/dist/
+public/downloads/*.zip
 
 # misc
 .DS_Store
 *.pem
+CLAUDE.md
 .idea/
 .vscode/
 

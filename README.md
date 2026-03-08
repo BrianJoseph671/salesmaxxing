@@ -2,17 +2,31 @@
 
 AI-powered lead qualification from your LinkedIn network.
 
-**Problem:** Sales reps struggle to close obvious opportunities.
+## MVP Status
 
-**Solution:** Any rep can qualify with confidence using the SalesMAXXing Agent.
+SalesMAXXing is in late MVP polish.
+
+What is already working:
+- LinkedIn sign-in through Supabase
+- Chrome extension popup + side panel
+- LinkedIn profile / connections extraction
+- AI lead qualification and ranking
+- Lead persistence in Supabase
+- InMail draft generation
+
+Production app:
+- `https://salesmaxxing.vercel.app`
+
+Current extension download:
+- `https://salesmaxxing.vercel.app/downloads/salesmaxxing-extension.zip`
 
 ## What It Does
 
-Chrome extension that sits alongside LinkedIn. Sign in with LinkedIn, and immediately get AI-qualified leads from your own network -- ranked by fit, with context on why they match, and a one-click InMail draft.
+SalesMAXXing is a Chrome extension that lives alongside LinkedIn. After sign-in, it qualifies leads from your own network, ranks the best fits, explains why they match, and drafts personalized outreach.
 
-Two qualification modes:
-- **Automatic** -- AI reviews your profile and job to surface the 5-10 best leads from your connections
-- **Custom** -- You provide keywords, URLs, and criteria for targeted qualification
+Qualification modes:
+- `Automatic`: AI infers your ICP from your profile and ranks the strongest matches.
+- `Custom`: you define keywords, target companies, industries, and ICP notes.
 
 ## Stack
 
@@ -24,67 +38,51 @@ Two qualification modes:
 | Linting | Biome |
 | Package Manager | Bun |
 | Auth | Supabase + LinkedIn OIDC |
-| Database | Supabase (Postgres) |
-| AI | Vercel AI SDK + Claude (Anthropic) |
+| Database | Supabase Postgres |
+| AI | Vercel AI SDK + Claude |
 | Hosting | Vercel |
 | Extension | Chrome Manifest V3 |
 
 ## Development
 
 ```bash
-# Install dependencies
 bun install
-
-# Run Next.js dev server
 bun run dev
-
-# Run full repo checks
-bun run check
-
-# Build Chrome extension
-bun run ext:build
-
-# Build Chrome extension (watch mode)
-bun run ext:dev
-
-# Lint
 bun run lint
-
-# Auto-fix lint issues
-bun run lint:fix
-
-# Typecheck
 bun run typecheck
-
-# Production build
+bun run ext:build
+bun run ext:zip
 bun run build
-
-# Deploy to Vercel production
 bun run deploy:prod
 ```
 
-### Loading the Extension
+Useful scripts:
+- `bun run ext:build` builds `extension/dist/`
+- `bun run ext:zip` builds the extension and packages `public/downloads/salesmaxxing-extension.zip`
+- `bun run check` runs lint, typecheck, app build, and extension build
 
-1. Run `bun run ext:build`
-2. Open `chrome://extensions`
-3. Enable "Developer mode"
-4. Click "Load unpacked" and select the `extension/dist/` directory
+## Trying The Extension
+
+1. Download `https://salesmaxxing.vercel.app/downloads/salesmaxxing-extension.zip`
+2. Unzip it
+3. Open `chrome://extensions`
+4. Enable Developer Mode
+5. Click `Load unpacked`
+6. Select the extracted `salesmaxxing-extension` folder
 
 ## Project Structure
 
-```
+```text
 salesmaxxing/
-├── src/app/              # Next.js web app (auth, API routes, dashboard)
+├── src/app/              # Next.js web app (auth, API routes, landing page)
 ├── extension/
-│   ├── src/              # Extension source (TypeScript/React)
-│   │   ├── popup.tsx     # Extension popup UI
-│   │   ├── sidepanel.tsx # Side panel UI (main interface)
-│   │   ├── content.ts    # LinkedIn content script
-│   │   └── background.ts # Service worker
+│   ├── src/              # Extension source
 │   ├── manifest.json     # Manifest V3 config
-│   └── dist/             # Built extension (load this in Chrome)
-├── scripts/              # Build scripts
-└── todo.md               # Implementation plan + checklist
+│   └── dist/             # Built unpacked extension
+├── public/downloads/     # Generated extension ZIP for the landing page
+├── scripts/              # Build + packaging scripts
+├── supabase/migrations/  # Database schema changes
+└── todo.md               # Implementation checklist
 ```
 
 ## License

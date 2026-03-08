@@ -2,7 +2,8 @@ import { ArrowRight, Download } from "lucide-react";
 import Image from "next/image";
 import { getUser } from "@/src/lib/supabase/auth";
 
-const CHROME_STORE_URL = "#install";
+const EXTENSION_DOWNLOAD_URL = "/downloads/salesmaxxing-extension.zip";
+const INSTALL_SECTION_ID = "install";
 
 /* ---------- Nav ---------- */
 function Nav({ signedIn }: { signedIn: boolean }) {
@@ -47,10 +48,11 @@ function Nav({ signedIn }: { signedIn: boolean }) {
 								Sign in
 							</a>
 							<a
-								href={CHROME_STORE_URL}
+								href={EXTENSION_DOWNLOAD_URL}
+								download
 								className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-black transition hover:bg-zinc-200"
 							>
-								Install
+								Download ZIP
 								<Download className="h-3.5 w-3.5" />
 							</a>
 						</>
@@ -88,13 +90,20 @@ function Hero({ signedIn }: { signedIn: boolean }) {
 						</a>
 					) : (
 						<a
-							href={CHROME_STORE_URL}
+							href={EXTENSION_DOWNLOAD_URL}
+							download
 							className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200"
 						>
-							Install Extension
+							Download Extension ZIP
 							<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
 						</a>
 					)}
+					<a
+						href={`#${INSTALL_SECTION_ID}`}
+						className="inline-flex items-center gap-2 rounded-full border border-white/10 px-7 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/[0.04]"
+					>
+						How To Install
+					</a>
 				</div>
 			</div>
 		</section>
@@ -199,6 +208,74 @@ function Features() {
 	);
 }
 
+function InstallSection() {
+	return (
+		<section
+			id={INSTALL_SECTION_ID}
+			className="border-t border-white/[0.04] px-6 py-24"
+		>
+			<div className="mx-auto max-w-3xl">
+				<p className="text-xs uppercase tracking-[0.3em] text-zinc-600">
+					Try the MVP
+				</p>
+				<div className="mt-8 rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
+					<div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+						<div className="max-w-xl">
+							<h2 className="text-2xl font-semibold tracking-tight text-white">
+								Download the latest Chrome extension ZIP
+							</h2>
+							<p className="mt-3 text-sm leading-7 text-zinc-400">
+								SalesMAXXing is not in the Chrome Web Store yet. Download the
+								current MVP build, unzip it, then load the extracted folder as
+								an unpacked extension in Chrome.
+							</p>
+						</div>
+						<a
+							href={EXTENSION_DOWNLOAD_URL}
+							download
+							className="inline-flex items-center gap-2 self-start rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200"
+						>
+							Download ZIP
+							<Download className="h-4 w-4" />
+						</a>
+					</div>
+
+					<div className="mt-8 grid gap-6 sm:grid-cols-3">
+						<div>
+							<p className="text-[11px] font-medium uppercase tracking-[0.24em] text-zinc-600">
+								1. Download
+							</p>
+							<p className="mt-2 text-sm leading-6 text-zinc-400">
+								Grab the ZIP and extract the <code>salesmaxxing-extension</code>{" "}
+								folder anywhere on your machine.
+							</p>
+						</div>
+						<div>
+							<p className="text-[11px] font-medium uppercase tracking-[0.24em] text-zinc-600">
+								2. Load Unpacked
+							</p>
+							<p className="mt-2 text-sm leading-6 text-zinc-400">
+								Open <code>chrome://extensions</code>, enable Developer Mode,
+								click <code>Load unpacked</code>, and select the extracted
+								folder.
+							</p>
+						</div>
+						<div>
+							<p className="text-[11px] font-medium uppercase tracking-[0.24em] text-zinc-600">
+								3. Start Qualifying
+							</p>
+							<p className="mt-2 text-sm leading-6 text-zinc-400">
+								Open the extension popup, sign in with LinkedIn, and launch the
+								side panel on LinkedIn to rank leads.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	);
+}
+
 /* ---------- Footer ---------- */
 function Footer({ signedIn }: { signedIn: boolean }) {
 	return (
@@ -214,6 +291,13 @@ function Footer({ signedIn }: { signedIn: boolean }) {
 							Dashboard
 						</a>
 					)}
+					<a
+						href={EXTENSION_DOWNLOAD_URL}
+						download
+						className="text-sm text-zinc-500 transition hover:text-zinc-300"
+					>
+						Download
+					</a>
 					<a
 						href="/privacy"
 						className="text-sm text-zinc-500 transition hover:text-zinc-300"
@@ -245,6 +329,7 @@ export default async function Home() {
 			<Hero signedIn={signedIn} />
 			<HowItWorks />
 			<Features />
+			<InstallSection />
 			<Footer signedIn={signedIn} />
 		</main>
 	);
