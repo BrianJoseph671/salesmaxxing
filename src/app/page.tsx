@@ -6,6 +6,7 @@ export default async function Home() {
 		typeof user?.user_metadata?.full_name === "string"
 			? user.user_metadata.full_name
 			: user?.email || null;
+	const signedInCopy = name ? `Signed in as ${name}` : "Signed in";
 
 	return (
 		<main className="min-h-screen bg-black px-6 py-16 text-white">
@@ -22,6 +23,11 @@ export default async function Home() {
 						Authenticate with LinkedIn first, then the extension can attach to
 						the same session.
 					</p>
+					{user ? (
+						<p className="mt-6 text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">
+							{signedInCopy}
+						</p>
+					) : null}
 				</div>
 				<div className="flex flex-wrap gap-3">
 					{user ? (
@@ -42,7 +48,7 @@ export default async function Home() {
 					) : (
 						<a
 							className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200"
-							href="/auth/linkedin?next=/overview"
+							href="/sign-in?next=/"
 						>
 							Sign in with LinkedIn
 						</a>
@@ -59,7 +65,7 @@ export default async function Home() {
 						<p className="mt-3 text-sm leading-6 text-zinc-400">
 							{user
 								? `Current session: ${name}`
-								: "OAuth wiring is now in place. The remaining non-code step is adding SalesMAXXing callback URLs to the reused Supabase project."}
+								: "Start the SalesMAXXing sign-in flow and you will return here signed in."}
 						</p>
 					</div>
 					<div className="rounded-[2rem] border border-white/10 bg-zinc-950 p-6">

@@ -28,7 +28,7 @@ function getErrorCopy(error?: string) {
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
 	const params = searchParams ? await searchParams : undefined;
-	const next = params?.next || "/overview";
+	const next = params?.next || "/";
 	const error = getErrorCopy(params?.error);
 	const extensionId =
 		typeof params?.extensionId === "string" ? params.extensionId : undefined;
@@ -52,13 +52,13 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 					Sign in to SalesMAXXing
 				</h1>
 				<p className="mt-4 text-base leading-7 text-zinc-400">
-					This flow reuses the existing DeathNote Supabase project for speed
-					while we validate the extension and lead qualification flow.
+					This flow reuses the existing Supabase auth project for speed while
+					we validate the extension and lead qualification flow in production.
 				</p>
 				{extensionId ? (
 					<p className="mt-4 text-sm leading-6 text-zinc-500">
 						After LinkedIn returns, SalesMAXXing will sync your session back to
-						the extension automatically.
+						the extension and reopen it automatically.
 					</p>
 				) : null}
 				{error ? (

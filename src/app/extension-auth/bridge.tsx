@@ -26,7 +26,7 @@ type SyncState =
 
 function getSafeNextPath(next: string | null) {
 	if (!next || !next.startsWith("/") || next.startsWith("//")) {
-		return "/overview";
+		return "/";
 	}
 
 	return next;
@@ -158,9 +158,9 @@ export default function ExtensionAuthBridge() {
 				<div className="mt-8 flex flex-wrap gap-3">
 					<Link
 						className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200"
-						href="/overview"
+						href="/"
 					>
-						Open overview
+						Open SalesMAXXing
 					</Link>
 					<Link
 						className="rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/5"

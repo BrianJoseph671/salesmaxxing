@@ -1,7 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { normalizeConfiguredValue } from "@/src/lib/env";
 
 const allowedExtensionOrigins = new Set(
-	(process.env.ALLOWED_EXTENSION_ORIGINS ?? "")
+	normalizeConfiguredValue(process.env.ALLOWED_EXTENSION_ORIGINS)
 		.split(",")
 		.map((value) => value.trim())
 		.filter(Boolean),

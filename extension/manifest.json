@@ -4,11 +4,7 @@
 	"version": "0.1.0",
 	"description": "AI-powered lead qualification from your LinkedIn network.",
 	"permissions": ["activeTab", "storage", "sidePanel"],
-	"host_permissions": [
-		"https://*.linkedin.com/*",
-		"http://localhost/*",
-		"https://salesmaxxing.vercel.app/*"
-	],
+	"host_permissions": ["https://*.linkedin.com/*", "https://salesmaxxing.vercel.app/*"],
 	"action": {
 		"default_popup": "popup.html",
 		"default_icon": {
@@ -26,7 +22,7 @@
 		"type": "module"
 	},
 	"externally_connectable": {
-		"matches": ["http://localhost/*", "https://salesmaxxing.vercel.app/*"]
+		"matches": ["https://salesmaxxing.vercel.app/*"]
 	},
 	"content_scripts": [
 		{

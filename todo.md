@@ -266,12 +266,12 @@ Key mitigations: dynamic URL in manifest, human-speed interactions, read-only be
 - [x] Extension popup: login state detection + redirect to auth
 
 ### Chrome Extension — Content Script
-- [ ] LinkedIn profile page detection (URL pattern + MutationObserver)
-- [ ] DOM data extraction module (name, headline, company, about, experience, education)
-- [ ] Resilient selector system (data-*, aria-label, partial class match)
+- [x] LinkedIn profile page detection (URL pattern + MutationObserver)
+- [x] DOM data extraction module (name, headline, company, about, experience, education)
+- [x] Resilient selector system (data-*, aria-label, partial class match)
 - [ ] Own-profile extraction (first-run onboarding step)
-- [ ] Connections page crawler (scroll + capture, human-speed delays)
-- [ ] Message passing to background service worker
+- [x] Connections page crawler (scroll + capture, human-speed delays)
+- [x] Message passing to background service worker
 
 ### Chrome Extension — Side Panel UI
 - [x] Side panel registration and shell
@@ -284,8 +284,8 @@ Key mitigations: dynamic URL in manifest, human-speed interactions, read-only be
 - [ ] Empty states and error handling
 
 ### Chrome Extension — Background Worker
-- [ ] Message routing between content script ↔ side panel
-- [ ] Auth token management (read from chrome.storage)
+- [x] Message routing between content script ↔ side panel
+- [x] Auth token management (read from chrome.storage)
 - [ ] Data caching in chrome.storage.local
 - [ ] Coordination of multi-page extraction (profile + connections)
 
@@ -419,19 +419,19 @@ User can sign in with LinkedIn and the extension knows who they are.
 
 Content script can read profile data and connections from LinkedIn pages.
 
-- [ ] 3.1 — Content script: detect LinkedIn profile page (`/in/*` URL pattern)
-- [ ] 3.2 — Build DOM extraction module with resilient selectors
-- [ ] 3.3 — Extract profile fields: name, headline, location, about, experience, education
-- [ ] 3.4 — Try JSON-LD extraction first (`<script type="application/ld+json">`)
-- [ ] 3.5 — Fall back to DOM selectors (`pv-top-card`, `pvs-list__*`, `data-*`, `aria-label`)
-- [ ] 3.6 — Add MutationObserver for SPA navigation (detect page changes)
+- [x] 3.1 — Content script: detect LinkedIn profile page (`/in/*` URL pattern)
+- [x] 3.2 — Build DOM extraction module with resilient selectors
+- [x] 3.3 — Extract profile fields: name, headline, location, about, experience, education
+- [x] 3.4 — Try JSON-LD extraction first (`<script type="application/ld+json">`)
+- [x] 3.5 — Fall back to DOM selectors (`pv-top-card`, `pvs-list__*`, `data-*`, `aria-label`)
+- [x] 3.6 — Add MutationObserver for SPA navigation (detect page changes)
 - [ ] 3.7 — Extract authenticated user's own profile (navigate to own profile URL)
 - [ ] 3.8 — Save own profile data to chrome.storage + Supabase `user_profiles`
-- [ ] 3.9 — Content script: detect connections page, extract connection cards
-- [ ] 3.10 — Implement human-speed auto-scroll (randomized 1-3s delays per batch)
-- [ ] 3.11 — Capture connections as they scroll (name, headline, profile URL)
+- [x] 3.9 — Content script: detect connections page, extract connection cards
+- [x] 3.10 — Implement human-speed auto-scroll (randomized 1-3s delays per batch)
+- [x] 3.11 — Capture connections as they scroll (name, headline, profile URL)
 - [ ] 3.12 — Store extracted connections in chrome.storage.local (cache)
-- [ ] 3.13 — Background worker: coordinate extraction flow (profile → connections)
+- [x] 3.13 — Background worker: coordinate extraction flow (profile → connections)
 - [ ] 3.14 — Verify: load extension, visit LinkedIn, confirm data extraction in devtools
 
 **Checkpoint: Extension extracts your profile + connections from LinkedIn DOM.**
@@ -484,7 +484,7 @@ The beautiful, always-available side panel that makes this product special.
 
 One-click personalized message for any qualified lead.
 
-- [ ] 6.1 — Build `/api/generate-intro` route (POST, auth-gated)
+- [x] 6.1 — Build `/api/generate-intro` route (POST, auth-gated)
 - [ ] 6.2 — System prompt: personalized outreach (warm, relevant, not spammy)
 - [ ] 6.3 — Input: rep profile + lead profile + qualification context + tone
 - [ ] 6.4 — Stream response to side panel for real-time draft display

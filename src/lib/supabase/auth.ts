@@ -3,11 +3,15 @@ import {
 	createServerClient as createSupabaseServerClient,
 } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { normalizeConfiguredValue } from "@/src/lib/env";
 
-const supabaseUrl =
-	process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-const supabaseAnonKey =
-	process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+const supabaseUrl = normalizeConfiguredValue(
+	process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL,
+);
+const supabaseAnonKey = normalizeConfiguredValue(
+	process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY,
+);
+const appUrl = normalizeConfiguredValue(process.env.NEXT_PUBLIC_APP_URL);
 
 if (!supabaseUrl || !supabaseAnonKey) {
 	throw new Error("Missing Supabase environment variables for auth");
@@ -19,7 +23,7 @@ const chromeExtensionIdPattern = /^[a-p]{32}$/;
 
 export function getSafeRedirectPath(
 	redirectTo: string | null | undefined,
-	fallback = "/overview",
+	fallback = "/",
 ) {
 	if (
 		!redirectTo ||
@@ -33,15 +37,15 @@ export function getSafeRedirectPath(
 }
 
 export function getAppUrl(requestUrl?: string) {
-	if (process.env.NEXT_PUBLIC_APP_URL) {
-		return process.env.NEXT_PUBLIC_APP_URL;
+	if (appUrl) {
+		return appUrl;
 	}
 
 	if (requestUrl) {
 		return new URL(requestUrl).origin;
 	}
 
-	return "http://localhost:3000";
+	return "https://salesmaxxing.vercel.app";
 }
 
 export function getSafeExtensionId(extensionId: string | null | undefined) {

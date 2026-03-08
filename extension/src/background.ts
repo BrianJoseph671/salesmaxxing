@@ -26,10 +26,7 @@ type StoredExtensionSession = {
 	user: ExternalAuthMessage["user"];
 };
 
-const allowedExternalOrigins = new Set([
-	"http://localhost:3000",
-	"https://salesmaxxing.vercel.app",
-]);
+const allowedExternalOrigins = new Set(["https://salesmaxxing.vercel.app"]);
 
 function isExternalAuthMessage(
 	message: unknown,
@@ -75,6 +72,59 @@ function toStoredExtensionSession(
 	};
 }
 
+// ---------------------------------------------------------------------------
+// Content script message types
+// ---------------------------------------------------------------------------
+
+type PageChangedMessage = {
+	pageType: "profile" | "connections" | "search" | "other";
+	type: "page-changed";
+	url: string;
+};
+
+type ConnectionsProgressMessage = {
+	count: number;
+	total: number | null;
+	type: "connections-progress";
+};
+
+type ContentScriptInternalMessage =
+	| ConnectionsProgressMessage
+	| PageChangedMessage;
+
+function isContentScriptMessage(
+	message: unknown,
+): message is ContentScriptInternalMessage {
+	if (!message || typeof message !== "object") {
+		return false;
+	}
+	const msg = message as { type?: string };
+	return msg.type === "page-changed" || msg.type === "connections-progress";
+}
+
+// ---------------------------------------------------------------------------
+// Side panel message types (from side panel UI)
+// ---------------------------------------------------------------------------
+
+type SidePanelMessage = {
+	type: "request-extract-profile" | "request-extract-connections";
+};
+
+function isSidePanelMessage(message: unknown): message is SidePanelMessage {
+	if (!message || typeof message !== "object") {
+		return false;
+	}
+	const msg = message as { type?: string };
+	return (
+		msg.type === "request-extract-profile" ||
+		msg.type === "request-extract-connections"
+	);
+}
+
+// ---------------------------------------------------------------------------
+// Lifecycle
+// ---------------------------------------------------------------------------
+
 chrome.runtime.onInstalled.addListener(() => {
 	// biome-ignore lint/suspicious/noConsole: service worker boot logging
 	console.log("[SalesMAXXing] Extension installed");
@@ -107,8 +157,13 @@ chrome.runtime.onMessageExternal.addListener(
 			.set({
 				authSession: toStoredExtensionSession(message),
 			})
-			.then(() => {
-				sendResponse({ ok: true });
+			.then(async () => {
+				try {
+					await chrome.action.openPopup();
+					sendResponse({ ok: true });
+				} catch {
+					sendResponse({ ok: true });
+				}
 			})
 			.catch(() => {
 				sendResponse({
@@ -120,3 +175,67 @@ chrome.runtime.onMessageExternal.addListener(
 		return true;
 	},
 );
+
+// ---------------------------------------------------------------------------
+// Internal message routing (content script ↔ side panel)
+// ---------------------------------------------------------------------------
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	// Messages from content script → store state / forward to side panel
+	if (isContentScriptMessage(message)) {
+		if (message.type === "page-changed") {
+			void chrome.storage.local.set({
+				currentPage: {
+					pageType: message.pageType,
+					updatedAt: new Date().toISOString(),
+					url: message.url,
+				},
+			});
+			// biome-ignore lint/suspicious/noConsole: message routing logging
+			console.log(`[SalesMAXXing] Page: ${message.pageType} — ${message.url}`);
+		}
+
+		if (message.type === "connections-progress") {
+			// biome-ignore lint/suspicious/noConsole: progress logging
+			console.log(
+				`[SalesMAXXing] Connections progress: ${String(message.count)}`,
+			);
+		}
+
+		sendResponse({ ok: true });
+		return false;
+	}
+
+	// Messages from side panel → forward extraction requests to active LinkedIn tab
+	if (isSidePanelMessage(message)) {
+		const extractType =
+			message.type === "request-extract-profile"
+				? "extract-profile"
+				: "extract-connections";
+
+		void chrome.tabs
+			.query({ active: true, currentWindow: true })
+			.then((tabs) => {
+				const tab = tabs[0];
+				if (!tab?.id) {
+					sendResponse({ error: "No active tab found." });
+					return;
+				}
+
+				void chrome.tabs
+					.sendMessage(tab.id, { type: extractType })
+					.then((response: unknown) => {
+						sendResponse(response);
+					})
+					.catch(() => {
+						sendResponse({
+							error: "Content script not responding.",
+						});
+					});
+			});
+
+		return true; // async response
+	}
+
+	return false;
+});

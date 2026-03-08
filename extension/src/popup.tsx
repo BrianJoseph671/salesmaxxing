@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 
-const APP_URL_CANDIDATES = [
-	"http://localhost:3000",
-	"https://salesmaxxing.vercel.app",
-];
+const APP_URL = "https://salesmaxxing.vercel.app";
 
 type ActiveTabState = {
 	id?: number;
@@ -53,7 +50,7 @@ async function probeAuthStatus(appUrl: string): Promise<AuthStatus | null> {
 	try {
 		const response = await fetchJsonWithTimeout(
 			`${appUrl}/api/auth/status`,
-			appUrl.startsWith("http://localhost") ? 800 : 1500,
+			1500,
 		);
 
 		if (!response.ok) {
@@ -132,7 +129,7 @@ function Popup() {
 						active: true,
 						currentWindow: true,
 					}),
-					Promise.all(APP_URL_CANDIDATES.map(probeAuthStatus)),
+					Promise.all([probeAuthStatus(APP_URL)]),
 					readStoredAuthStatus(),
 				]);
 				const tab = tabs[0];
@@ -164,11 +161,8 @@ function Popup() {
 		setError(null);
 
 		if (!authStatus?.isAuthenticated) {
-			const signInUrl = new URL(
-				"/sign-in",
-				authStatus?.appUrl ?? "https://salesmaxxing.vercel.app",
-			);
-			signInUrl.searchParams.set("next", "/overview");
+			const signInUrl = new URL("/sign-in", authStatus?.appUrl ?? APP_URL);
+			signInUrl.searchParams.set("next", "/");
 			signInUrl.searchParams.set("extensionId", chrome.runtime.id);
 			const authUrl = signInUrl.toString();
 			await chrome.tabs.create({ url: authUrl });

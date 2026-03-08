@@ -1,8 +1,11 @@
 import type { NextConfig } from "next";
+import { normalizeConfiguredValue } from "./src/lib/env";
 
 const isDev = process.env.NODE_ENV === "development";
-const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const appUrl = normalizeConfiguredValue(process.env.NEXT_PUBLIC_APP_URL);
+const supabaseUrl = normalizeConfiguredValue(
+	process.env.NEXT_PUBLIC_SUPABASE_URL,
+);
 
 const appOrigin = appUrl ? new URL(appUrl).origin : "";
 const supabaseOrigin = supabaseUrl ? new URL(supabaseUrl).origin : "";
@@ -19,7 +22,6 @@ const connectSources = [
 	"https://*.supabase.co",
 	"https://vitals.vercel-insights.com",
 	"https://vitals.vercel-analytics.com",
-	...(isDev ? ["http://localhost:*", "ws://localhost:*"] : []),
 ].filter(Boolean);
 
 const csp = [
