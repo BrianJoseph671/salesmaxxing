@@ -22,35 +22,12 @@ interface AuthState {
 	isLoading: boolean;
 }
 
-interface StoredSession {
-	accessToken: string;
-	refreshToken: string;
-	user: {
-		id: string;
-		user_metadata: {
-			full_name?: string;
-			avatar_url?: string;
-			email?: string;
-		};
-	};
-}
-
-function isStoredSession(value: unknown): value is StoredSession {
-	if (!value || typeof value !== "object") return false;
-	const v = value as Record<string, unknown>;
-	if (typeof v.accessToken !== "string") return false;
-	if (!v.user || typeof v.user !== "object") return false;
-	const user = v.user as Record<string, unknown>;
-	return typeof user.id === "string";
-}
-
-function sessionToUserInfo(session: StoredSession): UserInfo {
-	const meta = session.user.user_metadata;
+function sessionToUserInfo(session: StoredAuthSession): UserInfo {
 	return {
 		id: session.user.id,
-		name: meta.full_name ?? "LinkedIn User",
-		avatarUrl: meta.avatar_url ?? "",
-		email: meta.email ?? "",
+		name: session.user.name ?? session.user.email ?? "LinkedIn User",
+		avatarUrl: "",
+		email: session.user.email ?? "",
 	};
 }
 
@@ -61,13 +38,17 @@ export function useAuth(): AuthState {
 	useEffect(() => {
 		let cancelled = false;
 
-		async function checkAuth() {
+		async function syncAuth() {
 			try {
-				const result = await chrome.storage.local.get("authSession");
+				const authSession = await getAuthSession();
 				if (cancelled) return;
 
-				if (isStoredSession(result.authSession)) {
-					setUser(sessionToUserInfo(result.authSession));
+				if (
+					authSession &&
+					(typeof authSession.expiresAt !== "number" ||
+						authSession.expiresAt * 1000 > Date.now())
+				) {
+					setUser(sessionToUserInfo(authSession));
 				} else {
 					setUser(null);
 				}
@@ -78,10 +59,23 @@ export function useAuth(): AuthState {
 			}
 		}
 
-		void checkAuth();
+		function handleStorageChange(
+			changes: Record<string, chrome.storage.StorageChange>,
+			areaName: string,
+		) {
+			if (areaName !== "local" || !("authSession" in changes)) {
+				return;
+			}
+
+			void syncAuth();
+		}
+
+		void syncAuth();
+		chrome.storage.onChanged.addListener(handleStorageChange);
 
 		return () => {
 			cancelled = true;
+			chrome.storage.onChanged.removeListener(handleStorageChange);
 		};
 	}, []);
 
