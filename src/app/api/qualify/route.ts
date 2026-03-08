@@ -1,4 +1,4 @@
-import { Output, streamText } from "ai";
+import { generateObject } from "ai";
 import { type NextRequest, NextResponse } from "next/server";
 import {
 	getAutomaticQualificationPrompt,
@@ -81,22 +81,17 @@ export async function POST(request: NextRequest) {
 
 		const userMessage = formatConnectionsList(data);
 
-		const result = streamText({
+		const result = await generateObject({
 			model: getQualifyModel(),
 			system: systemPrompt,
 			prompt: userMessage,
-			output: Output.object({ schema: qualifyResponseSchema }),
+			schema: qualifyResponseSchema,
 			temperature: 0.3,
 		});
 
-		const streamResponse = result.toTextStreamResponse();
-
 		return applyExtensionCors(
 			request,
-			new NextResponse(streamResponse.body, {
-				status: streamResponse.status,
-				headers: streamResponse.headers,
-			}),
+			NextResponse.json(result.object),
 			"POST,OPTIONS",
 		);
 	} catch {

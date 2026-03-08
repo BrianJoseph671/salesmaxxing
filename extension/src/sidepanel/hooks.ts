@@ -414,23 +414,6 @@ interface ApiLead {
 	talkingPoints: string[];
 }
 
-/** Read a streaming fetch response to completion and return the full text. */
-async function readStream(response: Response): Promise<string> {
-	const reader = response.body?.getReader();
-	if (!reader) throw new Error("No response body received.");
-
-	const decoder = new TextDecoder();
-	let text = "";
-
-	for (;;) {
-		const { done, value } = await reader.read();
-		if (done) break;
-		text += decoder.decode(value, { stream: true });
-	}
-	text += decoder.decode();
-	return text;
-}
-
 /** Map API leads to the side panel QualifiedLead type. */
 function mapApiLeads(
 	apiLeads: ApiLead[],
@@ -549,17 +532,12 @@ export function useQualification(
 					);
 				}
 
-				// 4. Read streaming response and parse
-				setProgress("Receiving AI results...");
-				const fullText = await readStream(response);
-
+				// 4. Read the structured JSON response
 				setProgress("Processing results...");
-				let parsed: { leads: ApiLead[]; summary: string };
-				try {
-					parsed = JSON.parse(fullText);
-				} catch {
-					throw new Error("Failed to parse qualification results.");
-				}
+				const parsed = (await response.json()) as {
+					leads: ApiLead[];
+					summary: string;
+				};
 
 				if (!Array.isArray(parsed.leads) || parsed.leads.length === 0) {
 					await chrome.storage.local.set({ qualifiedLeads: [] });
