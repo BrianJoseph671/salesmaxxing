@@ -5,6 +5,11 @@ export const metadata: Metadata = {
 	title: "SalesMAXXing Agent",
 	description:
 		"AI-powered lead qualification from your LinkedIn network. Any rep can qualify with confidence.",
+	openGraph: {
+		title: "SalesMAXXing Agent",
+		description: "AI-powered lead qualification from your LinkedIn network.",
+		images: [{ url: "/logo.png", width: 1080, height: 1080 }],
+	},
 };
 
 export default function RootLayout({

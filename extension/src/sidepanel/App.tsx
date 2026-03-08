@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CustomQualForm } from "./components/CustomQualForm";
 import { EmptyState } from "./components/EmptyState";
 import { ErrorState } from "./components/ErrorState";
@@ -35,10 +35,14 @@ function writeOnboardingFlag() {
 
 export function App() {
 	const { user, isLoading: authLoading } = useAuth();
-	const { leads, refresh: refreshLeads, updateLeadStatus } = useLeads();
+	const {
+		leads,
+		isLoading: leadsLoading,
+		refresh: refreshLeads,
+		updateLeadStatus,
+	} = useLeads();
 
 	const [view, setView] = useState<SidePanelView>("loading");
-	const [hasResolved, setHasResolved] = useState(false);
 	const [composerLead, setComposerLead] = useState<QualifiedLead | null>(null);
 	const [qualError, setQualError] = useState<string | null>(null);
 
@@ -56,24 +60,47 @@ export function App() {
 		startQualification,
 	} = useQualification({ onComplete: handleQualificationComplete });
 
-	// Resolve initial view once auth check completes
-	if (!hasResolved && !authLoading) {
-		setHasResolved(true);
+	useEffect(() => {
+		if (authLoading) {
+			setView("loading");
+			return;
+		}
 
 		if (!user) {
 			setView("error");
-		} else if (readOnboardingFlag()) {
-			setView(leads.length > 0 ? "leads" : "empty");
-		} else {
-			setView("welcome");
+			return;
 		}
-	}
 
-	// If qualification fails, show error
-	if (qualificationError && view === "qualifying") {
+		if (leadsLoading && readOnboardingFlag()) {
+			setView("loading");
+			return;
+		}
+
+		setView((currentView) => {
+			if (currentView === "custom-form" || currentView === "composer") {
+				return currentView;
+			}
+
+			if (currentView === "qualifying" && !qualificationError) {
+				return currentView;
+			}
+
+			if (!readOnboardingFlag()) {
+				return "welcome";
+			}
+
+			return leads.length > 0 ? "leads" : "empty";
+		});
+	}, [authLoading, leads.length, leadsLoading, qualificationError, user]);
+
+	useEffect(() => {
+		if (!qualificationError) {
+			return;
+		}
+
 		setQualError(qualificationError);
 		setView("error");
-	}
+	}, [qualificationError]);
 
 	// ── Navigation callbacks ────────────────────────────────────────────────
 
