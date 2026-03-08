@@ -32,8 +32,11 @@ This is a hybrid project: a Next.js web app (auth, API routes, dashboard) and a 
 **Next.js web app** (`src/app/`):
 - Auth via Supabase LinkedIn OIDC (pattern ported from deathnote project)
 - AI routes use Vercel AI SDK with `@ai-sdk/anthropic` for Claude
-- `/api/qualify` — lead qualification (accepts connections + user profile, returns ranked leads)
-- `/api/generate-intro` — InMail draft generation
+- `/api/qualify` — lead qualification (streaming structured output, temperature 0.3)
+- `/api/generate-intro` — InMail draft generation (streaming text, temperature 0.7)
+- `/api/leads` — CRUD (GET sorted by score, POST save batch, PATCH status)
+- `/api/intros` — POST to persist generated InMail drafts
+- Supabase tables: `user_profiles`, `leads`, `intros`, `qualification_configs` — all with RLS
 - Deployed to Vercel
 
 **Chrome extension** (`extension/`):
@@ -54,9 +57,13 @@ This is a hybrid project: a Next.js web app (auth, API routes, dashboard) and a 
 ## Key Patterns
 
 - **Supabase auth, AI SDK, Vercel config** are ported from sibling projects (`deathnote`, `yenchat`) in `~/Documents/`. Reference those for proven patterns.
-- **Vercel AI SDK**: Use `generateText()` or `streamText()` from `ai` package with `@ai-sdk/anthropic` provider. Not direct Anthropic SDK calls.
-- **Extension ↔ web app auth**: Supabase session token stored in `chrome.storage` after OAuth callback. Extension reads token to authenticate API requests.
+- **Vercel AI SDK**: Use `generateText()` or `streamText()` from `ai` package. Structured output via `Output.object({ schema })`. Model provider configured in `src/lib/ai/provider.ts` — uses Vercel AI Gateway when `AI_GATEWAY_API_KEY` is set (preferred), falls back to direct `@ai-sdk/anthropic` otherwise.
+- **Dual auth in API routes**: `getUserFromRequest(request)` in `src/lib/supabase/auth.ts` checks Bearer token first (Chrome extension), falls back to cookie-based auth (web app). All API routes serving the extension must use this, not `getUser()`.
+- **Extension ↔ web app auth**: OAuth flow stores session in `chrome.storage.local` under `authSession` key (includes `accessToken`, `appUrl`, `user`). Extension sends `Authorization: Bearer {token}` on all API requests.
 - **Content script data flow**: Extract DOM → message to background worker → forward to side panel or API.
+- **Fire-and-forget persistence**: Save to `chrome.storage` first (instant, reliable), then sync to Supabase in background (resilient to network failures). Pattern used for leads, intros, and profile data.
+- **CORS for extension**: All API routes need `OPTIONS` handler with `createExtensionPreflightResponse()` and wrap responses with `applyExtensionCors()` from `src/lib/http/cors.ts`.
+- **Zod schemas**: Request/response validation in `src/lib/ai/schemas.ts`. Used by `/api/qualify` for structured AI output.
 
 ## Biome Rules
 

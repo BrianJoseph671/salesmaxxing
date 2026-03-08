@@ -1,6 +1,6 @@
-import { anthropic } from "@ai-sdk/anthropic";
 import { streamText } from "ai";
 import { type NextRequest, NextResponse } from "next/server";
+import { getIntroModel } from "@/src/lib/ai/provider";
 import {
 	applyExtensionCors,
 	createExtensionPreflightResponse,
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		const result = streamText({
-			model: anthropic("claude-sonnet-4-20250514"),
+			model: getIntroModel(),
 			system: systemPrompt,
 			messages: [
 				{

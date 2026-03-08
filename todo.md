@@ -409,7 +409,6 @@ User can sign in with LinkedIn and the extension knows who they are.
 - [x] 2.8 — Extension popup: detect auth state (check Supabase session via web app)
 - [x] 2.9 — Extension popup: "Sign in with LinkedIn" button → opens web app auth
 - [x] 2.10 — After auth callback, pass session token to extension (chrome.storage)
-- [ ] 2.11 — Verify: click extension → sign in → extension shows "Hello, [name]"
 
 **Checkpoint: Full LinkedIn sign-in works from the extension.**
 
@@ -432,7 +431,6 @@ Content script can read profile data and connections from LinkedIn pages.
 - [x] 3.11 — Capture connections as they scroll (name, headline, profile URL)
 - [x] 3.12 — Store extracted connections in chrome.storage.local (cache)
 - [x] 3.13 — Background worker: coordinate extraction flow (profile → connections)
-- [ ] 3.14 — Verify: load extension, visit LinkedIn, confirm data extraction in devtools
 
 **Checkpoint: Extension extracts your profile + connections from LinkedIn DOM.**
 
@@ -443,7 +441,6 @@ Content script can read profile data and connections from LinkedIn pages.
 Claude analyzes the user's network and returns ranked leads.
 
 - [x] 4.1 — Install Vercel AI SDK: `bun add ai @ai-sdk/anthropic`
-- [ ] 4.2 — Add ANTHROPIC_API_KEY to Vercel env vars
 - [x] 4.3 — Build `/api/qualify` route (POST, auth-gated via Supabase session)
 - [x] 4.4 — Write system prompt: sales qualification (what makes a good lead given the user's role)
 - [x] 4.5 — Automatic mode: send user profile + connections batch → Claude ranks top 5-10
@@ -451,7 +448,6 @@ Claude analyzes the user's network and returns ranked leads.
 - [x] 4.7 — Define response schema (name, score 0-100, justification, key signals, talking points)
 - [x] 4.8 — Implement streaming with Vercel AI SDK `streamText()` for real-time results
 - [x] 4.9 — Save qualified leads to Supabase `leads` table
-- [ ] 4.10 — Verify: send test data to API, get back ranked leads with justifications
 
 **Checkpoint: API takes connections + context, returns AI-ranked leads.**
 
@@ -474,7 +470,6 @@ The beautiful, always-available side panel that makes this product special.
 - [x] 5.11 — "Refresh" button: re-run qualification with latest data
 - [x] 5.12 — Empty state: no leads found / extraction in progress
 - [x] 5.13 — Error states: auth expired, API error, extraction failed
-- [ ] 5.14 — Verify: full flow from extension click → onboarding → see ranked leads
 
 **Checkpoint: Click extension, choose mode, see beautiful ranked lead cards.**
 
@@ -493,7 +488,6 @@ One-click personalized message for any qualified lead.
 - [x] 6.7 — Tone selector: professional / casual / mutual connection reference
 - [x] 6.8 — "Copy to Clipboard" button with confirmation feedback
 - [x] 6.9 — Save generated intros to Supabase `intros` table
-- [ ] 6.10 — Verify: click "Draft InMail" on lead → see personalized message → copy works
 
 **Checkpoint: Full MVP flow complete. Browse → Qualify → Draft → Copy → Send.**
 
@@ -512,7 +506,6 @@ Leads and intros persist across sessions.
 - [x] 7.7 — Build `/api/leads` CRUD routes (GET list, POST save, PATCH status)
 - [x] 7.8 — Side panel: load saved leads from Supabase on open
 - [x] 7.9 — Side panel: lead status tracking (new, contacted, replied, qualified)
-- [ ] 7.10 — Verify: close/reopen extension, leads + intros persist
 
 **Checkpoint: Data survives browser restarts. Leads are trackable.**
 
@@ -528,11 +521,27 @@ Make it beautiful, test it, package it.
 - [x] 8.4 — Side panel: score visualization (gradient bar, color-coded badge)
 - [x] 8.5 — Extension popup: branded, minimal, shows quick status
 - [x] 8.6 — Error boundary for extension crashes
-- [ ] 8.7 — Test on multiple LinkedIn page types (profile, company, search)
-- [ ] 8.8 — Test auth flow end-to-end (fresh install → sign in → qualify → draft)
 - [x] 8.9 — Privacy policy page (required for Chrome Web Store)
-- [ ] 8.10 — Chrome Web Store developer account + listing assets
 - [x] 8.11 — Web app landing page (what it does, install CTA, screenshots)
-- [ ] 8.12 — Submit to Chrome Web Store (or distribute as unpacked for beta)
+
+**Checkpoint: All code complete.**
+
+---
+
+### Manual Testing and Launch
+
+Requires hands-on browser testing and external account setup.
+
+- [ ] Add AI_GATEWAY_API_KEY to Vercel env vars (Vercel AI Gateway, or ANTHROPIC_API_KEY as fallback)
+- [ ] Verify: click extension → sign in → extension shows "Hello, [name]"
+- [ ] Verify: load extension, visit LinkedIn, confirm data extraction in devtools
+- [ ] Verify: send test data to API, get back ranked leads with justifications
+- [ ] Verify: full flow from extension click → onboarding → see ranked leads
+- [ ] Verify: click "Draft InMail" on lead → see personalized message → copy works
+- [ ] Verify: close/reopen extension, leads + intros persist
+- [ ] Test on multiple LinkedIn page types (profile, company, search)
+- [ ] Test auth flow end-to-end (fresh install → sign in → qualify → draft)
+- [ ] Chrome Web Store developer account + listing assets
+- [ ] Submit to Chrome Web Store (or distribute as unpacked for beta)
 
 **Checkpoint: MVP shipped. Installable, usable, beautiful.**

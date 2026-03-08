@@ -1,10 +1,10 @@
-import { anthropic } from "@ai-sdk/anthropic";
 import { Output, streamText } from "ai";
 import { type NextRequest, NextResponse } from "next/server";
 import {
 	getAutomaticQualificationPrompt,
 	getCustomQualificationPrompt,
 } from "@/src/lib/ai/prompts";
+import { getQualifyModel } from "@/src/lib/ai/provider";
 import type { QualifyRequest } from "@/src/lib/ai/schemas";
 import {
 	qualifyRequestSchema,
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 		const userMessage = formatConnectionsList(data);
 
 		const result = streamText({
-			model: anthropic("claude-sonnet-4-20250514"),
+			model: getQualifyModel(),
 			system: systemPrompt,
 			prompt: userMessage,
 			output: Output.object({ schema: qualifyResponseSchema }),
