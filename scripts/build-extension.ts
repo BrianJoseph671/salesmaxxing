@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { type BuildConfig, build } from "bun";
 
 const isWatch = process.argv.includes("--watch");
+const shouldMinify = process.argv.includes("--minify");
 const extensionDir = resolve(import.meta.dir, "../extension");
 const outDir = resolve(extensionDir, "dist");
 
@@ -13,8 +14,8 @@ const sharedConfig: Partial<BuildConfig> = {
 	outdir: outDir,
 	target: "browser",
 	format: "esm",
-	minify: !isWatch,
-	sourcemap: isWatch ? "linked" : "none",
+	minify: shouldMinify,
+	sourcemap: "linked",
 };
 
 // Compile Tailwind CSS for the side panel

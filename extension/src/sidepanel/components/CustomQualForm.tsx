@@ -61,7 +61,9 @@ function TagInput({ label, placeholder, tags, onTagsChange }: TagInputProps) {
 
 	return (
 		<label className="block">
-			<span className="block text-sm text-zinc-400 mb-2">{label}</span>
+			<span className="mb-2 block text-[11px] font-medium uppercase tracking-[0.24em] text-zinc-500">
+				{label}
+			</span>
 			<div
 				className={clsx(
 					"flex flex-wrap gap-1.5 min-h-[46px] p-2",
@@ -161,12 +163,27 @@ export function CustomQualForm({
 			</button>
 
 			{/* Header */}
-			<h1 className="text-xl font-bold text-white tracking-tight mb-1">
+			<p className="text-[11px] font-medium uppercase tracking-[0.28em] text-zinc-500">
+				Custom Qualification
+			</p>
+			<h1 className="mt-3 text-2xl font-bold text-white tracking-tight mb-1">
 				Custom Criteria
 			</h1>
 			<p className="text-sm text-zinc-400 leading-relaxed mb-6">
-				Tell us what makes a great lead for you. Fill in at least one field.
+				Define what a qualified prospect looks like for your ICP. The more
+				specific you are, the better the ranking quality gets.
 			</p>
+
+			<div className="mb-6 rounded-[20px] border border-white/10 bg-white/[0.04] px-4 py-4">
+				<p className="text-xs font-medium uppercase tracking-[0.22em] text-zinc-500">
+					What to add
+				</p>
+				<p className="mt-3 text-sm leading-6 text-zinc-400">
+					Use keywords for buying signals, industries for market fit, company
+					URLs for precise targeting, and ICP notes for the nuance AI should
+					respect while scoring.
+				</p>
+			</div>
 
 			{/* Scrollable form body */}
 			<div className="flex-1 overflow-y-auto -mx-1 px-1 space-y-5 mb-6">
@@ -188,7 +205,7 @@ export function CustomQualForm({
 
 				{/* Company URLs */}
 				<label className="block">
-					<span className="block text-sm text-zinc-400 mb-2">
+					<span className="mb-2 block text-[11px] font-medium uppercase tracking-[0.24em] text-zinc-500">
 						Target Companies
 					</span>
 					<textarea
@@ -207,7 +224,7 @@ export function CustomQualForm({
 
 				{/* ICP Notes */}
 				<label className="block">
-					<span className="block text-sm text-zinc-400 mb-2">
+					<span className="mb-2 block text-[11px] font-medium uppercase tracking-[0.24em] text-zinc-500">
 						Ideal Customer Profile
 					</span>
 					<textarea

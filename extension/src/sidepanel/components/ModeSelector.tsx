@@ -11,6 +11,7 @@ interface ModeCardProps {
 	icon: React.ReactNode;
 	title: string;
 	description: string;
+	badge?: string;
 	onClick: () => void;
 	accent?: boolean;
 }
@@ -19,6 +20,7 @@ function ModeCard({
 	icon,
 	title,
 	description,
+	badge,
 	onClick,
 	accent,
 }: ModeCardProps) {
@@ -43,7 +45,14 @@ function ModeCard({
 					{icon}
 				</div>
 				<div className="min-w-0 flex-1">
-					<h3 className="text-[15px] font-semibold text-white mb-1">{title}</h3>
+					<div className="mb-1 flex items-center gap-2">
+						<h3 className="text-[15px] font-semibold text-white">{title}</h3>
+						{badge ? (
+							<span className="rounded-full border border-white/12 bg-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-300">
+								{badge}
+							</span>
+						) : null}
+					</div>
 					<p className="text-sm text-zinc-400 leading-relaxed">{description}</p>
 				</div>
 			</div>
@@ -69,11 +78,15 @@ export function ModeSelector({
 			</button>
 
 			{/* Header */}
-			<h1 className="text-xl font-bold text-white tracking-tight mb-2">
+			<p className="text-[11px] font-medium uppercase tracking-[0.28em] text-zinc-500">
+				Qualification Mode
+			</p>
+			<h1 className="mt-3 text-2xl font-bold text-white tracking-tight mb-2">
 				How should we find your leads?
 			</h1>
 			<p className="text-sm text-zinc-400 leading-relaxed mb-8">
-				Choose a qualification strategy for your LinkedIn connections.
+				Let AI decide automatically, or define your own ICP with explicit
+				keywords, company targets, and filters.
 			</p>
 
 			{/* Mode cards */}
@@ -81,14 +94,15 @@ export function ModeSelector({
 				<ModeCard
 					icon={<Sparkles className="size-5 text-white/80" />}
 					title="Automatic"
-					description="AI reviews your profile and finds the best matches from your network."
+					description="AI reviews your profile, infers your best-fit buyers, and ranks the strongest matches from your network."
+					badge="Recommended"
 					onClick={onSelectAutomatic}
 					accent
 				/>
 				<ModeCard
 					icon={<SlidersHorizontal className="size-5 text-white/80" />}
 					title="Custom Criteria"
-					description="Define keywords, target companies, and your ideal customer profile."
+					description="Add your own keywords, target companies, and qualification questions to shape the scoring."
 					onClick={onSelectCustom}
 				/>
 			</div>

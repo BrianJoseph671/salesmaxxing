@@ -204,13 +204,35 @@ export const skills = {
 // Query helpers
 // ---------------------------------------------------------------------------
 
+function safeQuerySelector(
+	target: Document | Element,
+	selector: string,
+): Element | null {
+	try {
+		return target.querySelector(selector);
+	} catch {
+		return null;
+	}
+}
+
+function safeQuerySelectorAll(
+	target: Document | Element,
+	selector: string,
+): NodeListOf<Element> | null {
+	try {
+		return target.querySelectorAll(selector);
+	} catch {
+		return null;
+	}
+}
+
 /**
  * Try each selector in order, returning the first element that matches.
  * Returns null when none of the selectors match.
  */
 export function queryFirst(selectors: readonly string[]): Element | null {
 	for (const selector of selectors) {
-		const el = document.querySelector(selector);
+		const el = safeQuerySelector(document, selector);
 		if (el) {
 			return el;
 		}
@@ -226,7 +248,7 @@ export function queryFirstWithin(
 	selectors: readonly string[],
 ): Element | null {
 	for (const selector of selectors) {
-		const el = parent.querySelector(selector);
+		const el = safeQuerySelector(parent, selector);
 		if (el) {
 			return el;
 		}
@@ -242,8 +264,8 @@ export function queryAllFirst(
 	selectors: readonly string[],
 ): NodeListOf<Element> | null {
 	for (const selector of selectors) {
-		const els = document.querySelectorAll(selector);
-		if (els.length > 0) {
+		const els = safeQuerySelectorAll(document, selector);
+		if (els && els.length > 0) {
 			return els;
 		}
 	}
@@ -259,8 +281,8 @@ export function queryAllFirstWithin(
 	selectors: readonly string[],
 ): NodeListOf<Element> | null {
 	for (const selector of selectors) {
-		const els = parent.querySelectorAll(selector);
-		if (els.length > 0) {
+		const els = safeQuerySelectorAll(parent, selector);
+		if (els && els.length > 0) {
 			return els;
 		}
 	}

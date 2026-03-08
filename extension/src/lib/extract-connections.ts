@@ -6,6 +6,28 @@ const MAX_STALE_SCROLLS = 3;
 const SCROLL_DELAY_MIN = 1500;
 const SCROLL_DELAY_MAX = 3000;
 
+function safeQueryAll(
+	target: Document | Element,
+	selector: string,
+): HTMLElement[] {
+	try {
+		return Array.from(target.querySelectorAll<HTMLElement>(selector));
+	} catch {
+		return [];
+	}
+}
+
+function safeQuery(
+	target: Element,
+	selector: string,
+): Element | null {
+	try {
+		return target.querySelector(selector);
+	} catch {
+		return null;
+	}
+}
+
 /**
  * Detects whether the current page is the LinkedIn connections page.
  */
@@ -27,9 +49,9 @@ function findConnectionCards(): HTMLElement[] {
 	];
 
 	for (const selector of selectors) {
-		const cards = document.querySelectorAll<HTMLElement>(selector);
+		const cards = safeQueryAll(document, selector);
 		if (cards.length > 0) {
-			return Array.from(cards);
+			return cards;
 		}
 	}
 
@@ -46,7 +68,7 @@ function extractProfileUrl(card: HTMLElement): string | null {
 	];
 
 	for (const selector of linkSelectors) {
-		const link = card.querySelector<HTMLAnchorElement>(selector);
+		const link = safeQuery(card, selector) as HTMLAnchorElement | null;
 		if (link?.href) {
 			return normalizeProfileUrl(link.href);
 		}
@@ -80,7 +102,7 @@ function extractName(card: HTMLElement): string | null {
 	];
 
 	for (const selector of nameSelectors) {
-		const el = card.querySelector(selector);
+		const el = safeQuery(card, selector);
 		const text = el?.textContent?.trim();
 		if (text) {
 			return text;
@@ -88,7 +110,9 @@ function extractName(card: HTMLElement): string | null {
 	}
 
 	// Fallback: first link with /in/ path likely contains the name
-	const profileLink = card.querySelector<HTMLAnchorElement>("a[href*='/in/']");
+	const profileLink = safeQuery(card, "a[href*='/in/']") as
+		| HTMLAnchorElement
+		| null;
 	const linkText = profileLink?.textContent?.trim();
 	if (linkText) {
 		return linkText;
@@ -109,7 +133,7 @@ function extractHeadline(card: HTMLElement): string | null {
 	];
 
 	for (const selector of headlineSelectors) {
-		const el = card.querySelector(selector);
+		const el = safeQuery(card, selector);
 		const text = el?.textContent?.trim();
 		if (text) {
 			return text;
@@ -123,7 +147,7 @@ function extractHeadline(card: HTMLElement): string | null {
  * Extracts the avatar URL from a card element.
  */
 function extractAvatarUrl(card: HTMLElement): string | null {
-	const img = card.querySelector<HTMLImageElement>("img");
+	const img = safeQuery(card, "img") as HTMLImageElement | null;
 	if (img?.src && !img.src.includes("data:image")) {
 		return img.src;
 	}
