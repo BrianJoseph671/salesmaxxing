@@ -17,10 +17,7 @@ function safeQueryAll(
 	}
 }
 
-function safeQuery(
-	target: Element,
-	selector: string,
-): Element | null {
+function safeQuery(target: Element, selector: string): Element | null {
 	try {
 		return target.querySelector(selector);
 	} catch {
@@ -110,9 +107,10 @@ function extractName(card: HTMLElement): string | null {
 	}
 
 	// Fallback: first link with /in/ path likely contains the name
-	const profileLink = safeQuery(card, "a[href*='/in/']") as
-		| HTMLAnchorElement
-		| null;
+	const profileLink = safeQuery(
+		card,
+		"a[href*='/in/']",
+	) as HTMLAnchorElement | null;
 	const linkText = profileLink?.textContent?.trim();
 	if (linkText) {
 		return linkText;

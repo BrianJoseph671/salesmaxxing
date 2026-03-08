@@ -9,6 +9,9 @@ import {
 } from "./lib/app-auth";
 import { ErrorBoundary } from "./sidepanel/components/ErrorBoundary";
 
+const LINKEDIN_CONNECTIONS_URL =
+	"https://www.linkedin.com/mynetwork/invite-connect/connections/";
+
 type ActiveTabState = {
 	id?: number;
 	isLinkedIn: boolean;
@@ -45,7 +48,7 @@ function Popup() {
 
 					if (!authResult) {
 						popupError =
-							"SalesMAXXing is signed in on the web, but the extension session is still missing. Return to the SalesMAXXing sign-in tab and let it finish syncing.";
+							"SalesMAXXing is signed in, but the extension session is still missing. Return to the SalesMAXXing sign-in tab and let it finish syncing.";
 					}
 				}
 
@@ -81,7 +84,7 @@ function Popup() {
 		}
 
 		if (!activeTab.isLinkedIn) {
-			await chrome.tabs.create({ url: "https://www.linkedin.com/feed/" });
+			await chrome.tabs.create({ url: LINKEDIN_CONNECTIONS_URL });
 			window.close();
 			return;
 		}
@@ -101,7 +104,7 @@ function Popup() {
 
 				if (!syncedAuthStatus) {
 					setError(
-						"SalesMAXXing is signed in on the web, but the extension session has not synced yet. Finish the sign-in tab, then reopen the popup.",
+						"SalesMAXXing is signed in, but the extension session has not synced yet. Finish the sign-in tab, then reopen the popup.",
 					);
 					setIsOpening(false);
 					return;
@@ -125,8 +128,8 @@ function Popup() {
 		authStatus?.user?.name ?? authStatus?.user?.email ?? "LinkedIn user";
 	const authSourceCopy =
 		authStatus?.source === "extension"
-			? "Using the session stored in the extension."
-			: "Using the current web app session.";
+			? "Ready in this browser."
+			: "Ready from your current browser session.";
 	const buttonLabel = isAuthLoading
 		? "Checking session..."
 		: !isAuthenticated
@@ -135,7 +138,7 @@ function Popup() {
 				? "Opening..."
 				: activeTab.isLinkedIn
 					? "Open Lead Panel"
-					: "Open LinkedIn";
+					: "Open LinkedIn Connections";
 	const buttonDisabled = isAuthLoading || isOpening;
 
 	return (
@@ -161,7 +164,7 @@ function Popup() {
 					? "Checking your SalesMAXXing session..."
 					: isAuthenticated
 						? `Signed in as ${displayName}.`
-						: "Sign in once on the web app, then open the LinkedIn side panel here."}
+						: "Sign in to SalesMAXXing, then open your LinkedIn lead panel here."}
 			</p>
 			<button
 				onClick={() => void handlePrimaryAction()}
@@ -191,12 +194,12 @@ function Popup() {
 				}}
 			>
 				{isAuthLoading
-					? "Waiting for the web app to report your current auth state."
+					? "Checking your current sign-in status."
 					: isAuthenticated
 						? activeTab.isLinkedIn
 							? "Open the side panel on your current LinkedIn tab."
-							: "You are signed in. Switch to LinkedIn and reopen the panel."
-						: "This opens the web app sign-in flow. When the callback finishes, SalesMAXXing will sync the session into the extension automatically."}
+							: "Open your LinkedIn connections page, then launch the side panel."
+						: "This opens the SalesMAXXing sign-in flow and connects the extension automatically."}
 			</p>
 			{error ? (
 				<p
@@ -210,19 +213,6 @@ function Popup() {
 					{error}
 				</p>
 			) : null}
-			{authStatus?.appUrl ? (
-				<p
-					style={{
-						fontSize: 11,
-						color: "#52525b",
-						marginTop: 12,
-						lineHeight: 1.5,
-						wordBreak: "break-all",
-					}}
-				>
-					Auth origin: {authStatus.appUrl}
-				</p>
-			) : null}
 			{isAuthenticated ? (
 				<p
 					style={{
@@ -233,19 +223,6 @@ function Popup() {
 					}}
 				>
 					{authSourceCopy}
-				</p>
-			) : null}
-			{activeTab.url ? (
-				<p
-					style={{
-						fontSize: 11,
-						color: "#52525b",
-						marginTop: 12,
-						lineHeight: 1.5,
-						wordBreak: "break-all",
-					}}
-				>
-					Active tab: {activeTab.url}
 				</p>
 			) : null}
 		</div>

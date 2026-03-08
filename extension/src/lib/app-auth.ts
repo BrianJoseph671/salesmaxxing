@@ -85,7 +85,9 @@ function toStoredExtensionSession(
 	};
 }
 
-export async function probeAuthStatus(appUrl = APP_URL): Promise<AuthStatus | null> {
+export async function probeAuthStatus(
+	appUrl = APP_URL,
+): Promise<AuthStatus | null> {
 	try {
 		const response = await fetchJsonWithTimeout(
 			`${appUrl}/api/auth/status`,

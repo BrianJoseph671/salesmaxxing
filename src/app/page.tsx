@@ -27,7 +27,7 @@ function Nav({ signedIn }: { signedIn: boolean }) {
 					{signedIn ? (
 						<>
 							<a
-								href="/overview"
+								href="/dashboard"
 								className="text-sm text-zinc-400 transition hover:text-white"
 							>
 								Dashboard
@@ -82,7 +82,7 @@ function Hero({ signedIn }: { signedIn: boolean }) {
 				<div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
 					{signedIn ? (
 						<a
-							href="/overview"
+							href="/dashboard"
 							className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200"
 						>
 							Open Dashboard
@@ -121,7 +121,7 @@ const steps = [
 		num: "02",
 		title: "AI qualifies your network",
 		description:
-			"Claude reviews your connections against your ICP and ranks the best fits.",
+			"AI reviews your connections against your ICP and ranks the best fits.",
 	},
 	{
 		num: "03",
@@ -166,7 +166,7 @@ const features = [
 	{
 		title: "AI-first qualification",
 		description:
-			"Claude scores connections by fit — role, company, engagement, mutual context — not just data enrichment.",
+			"AI scores connections by fit — role, company, engagement, and mutual context — not just data enrichment.",
 	},
 	{
 		title: "One-click InMail drafts",
@@ -216,7 +216,7 @@ function InstallSection() {
 		>
 			<div className="mx-auto max-w-3xl">
 				<p className="text-xs uppercase tracking-[0.3em] text-zinc-600">
-					Try the MVP
+					Install
 				</p>
 				<div className="mt-8 rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
 					<div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
@@ -226,8 +226,8 @@ function InstallSection() {
 							</h2>
 							<p className="mt-3 text-sm leading-7 text-zinc-400">
 								SalesMAXXing is not in the Chrome Web Store yet. Download the
-								current MVP build, unzip it, then load the extracted folder as
-								an unpacked extension in Chrome.
+								current build, unzip it, then load the extracted folder as an
+								unpacked extension in Chrome.
 							</p>
 						</div>
 						<a
@@ -265,8 +265,8 @@ function InstallSection() {
 								3. Start Qualifying
 							</p>
 							<p className="mt-2 text-sm leading-6 text-zinc-400">
-								Open the extension popup, sign in with LinkedIn, and launch the
-								side panel on LinkedIn to rank leads.
+								Open the extension popup, sign in with LinkedIn, and launch
+								SalesMAXXing on LinkedIn to rank leads.
 							</p>
 						</div>
 					</div>
@@ -285,7 +285,7 @@ function Footer({ signedIn }: { signedIn: boolean }) {
 				<nav className="flex gap-5">
 					{signedIn && (
 						<a
-							href="/overview"
+							href="/dashboard"
 							className="text-sm text-zinc-500 transition hover:text-zinc-300"
 						>
 							Dashboard

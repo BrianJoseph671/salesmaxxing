@@ -37,7 +37,9 @@ async function sendSessionToExtension(
 	payload: ExtensionSessionPayload,
 ) {
 	if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) {
-		throw new Error("Chrome extension messaging is unavailable in this tab.");
+		throw new Error(
+			"Chrome couldn't find the SalesMAXXing extension in this tab. Reopen the extension and try again.",
+		);
 	}
 
 	await new Promise<void>((resolve, reject) => {
@@ -60,7 +62,8 @@ async function sendSessionToExtension(
 				if (!response?.ok) {
 					reject(
 						new Error(
-							response?.error || "The extension rejected the auth session.",
+							response?.error ||
+								"SalesMAXXing couldn't finish connecting the extension.",
 						),
 					);
 					return;
@@ -82,7 +85,8 @@ export default function ExtensionAuthBridge() {
 
 		if (!extensionId) {
 			setSyncState({
-				message: "Missing Chrome extension ID in the callback handoff.",
+				message:
+					"We couldn't find the extension handoff. Reopen the popup and try again.",
 				status: "error",
 			});
 			return;
@@ -98,7 +102,7 @@ export default function ExtensionAuthBridge() {
 				});
 
 				if (!response.ok) {
-					throw new Error("SalesMAXXing could not load the current session.");
+					throw new Error("We couldn't verify your current sign-in session.");
 				}
 
 				const payload = (await response.json()) as ExtensionSessionPayload;
@@ -123,7 +127,7 @@ export default function ExtensionAuthBridge() {
 				const message =
 					error instanceof Error
 						? error.message
-						: "SalesMAXXing could not sync the session to the extension.";
+						: "We couldn't connect your extension. Please reopen the popup and try again.";
 				setSyncState({ message, status: "error" });
 			}
 		};
@@ -139,34 +143,42 @@ export default function ExtensionAuthBridge() {
 		<main className="flex min-h-screen items-center bg-black px-6 py-16 text-white">
 			<div className="mx-auto w-full max-w-xl rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/40">
 				<p className="text-sm uppercase tracking-[0.3em] text-zinc-500">
-					Extension Session Sync
+					Chrome Extension
 				</p>
 				<h1 className="mt-4 text-4xl font-semibold tracking-tight">
 					{syncState.status === "success"
-						? "Extension connected"
+						? "You're signed in"
 						: syncState.status === "error"
-							? "Could not connect the extension"
+							? "We couldn't finish setup"
 							: "Connecting your extension"}
 				</h1>
 				<p className="mt-4 text-base leading-7 text-zinc-400">
 					{syncState.status === "success"
-						? `Signed in as ${syncState.name}. You can reopen the SalesMAXXing popup now.`
+						? `Signed in as ${syncState.name}. You can return to LinkedIn and open the SalesMAXXing popup.`
 						: syncState.status === "error"
 							? syncState.message
-							: "Passing your Supabase session from the web callback into chrome.storage so the extension can use it directly."}
+							: "Finishing the connection between your browser session and the SalesMAXXing extension."}
 				</p>
 				<div className="mt-8 flex flex-wrap gap-3">
 					<Link
 						className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200"
-						href="/"
+						href="/dashboard"
 					>
-						Open SalesMAXXing
+						Open Dashboard
 					</Link>
+					<a
+						className="rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/5"
+						href="https://www.linkedin.com/mynetwork/invite-connect/connections/"
+						target="_blank"
+						rel="noreferrer"
+					>
+						Open LinkedIn Connections
+					</a>
 					<Link
 						className="rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/5"
 						href="/sign-in"
 					>
-						Restart sign-in
+						Try Again
 					</Link>
 				</div>
 			</div>

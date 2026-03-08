@@ -1,6 +1,6 @@
 {
 	"manifest_version": 3,
-	"name": "SalesMAXXing Agent",
+	"name": "SalesMAXXing",
 	"version": "0.1.0",
 	"description": "AI-powered lead qualification from your LinkedIn network.",
 	"permissions": ["activeTab", "storage", "sidePanel"],

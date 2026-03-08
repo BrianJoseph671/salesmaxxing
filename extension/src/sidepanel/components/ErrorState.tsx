@@ -46,9 +46,19 @@ export function ErrorState({
 }: ErrorStateProps) {
 	const content = resolveContent(type, message);
 	const showSignIn = type === "auth-expired" && onSignIn;
+	const showOpenConnections =
+		type === "extraction-failed" ||
+		message.toLowerCase().includes("connection") ||
+		message.toLowerCase().includes("linkedin");
+
+	function handleOpenConnections() {
+		chrome.tabs.create({
+			url: "https://www.linkedin.com/mynetwork/invite-connect/connections/",
+		});
+	}
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-full px-8 py-16 animate-fade-in">
+		<div className="flex min-h-full flex-col items-center justify-center px-5 py-10 animate-fade-in">
 			{/* Icon */}
 			<div className="relative mb-6">
 				<div className="absolute -inset-3 rounded-2xl bg-red-500/[0.04] blur-lg" />
@@ -61,12 +71,12 @@ export function ErrorState({
 			<h2 className="text-base font-semibold text-white text-center mb-2">
 				{content.title}
 			</h2>
-			<p className="text-sm text-zinc-400 text-center leading-relaxed max-w-[280px] mb-8">
+			<p className="mb-8 max-w-[22rem] text-center text-sm leading-relaxed text-zinc-400">
 				{content.description}
 			</p>
 
 			{/* Actions */}
-			<div className="flex flex-col gap-2.5 w-full max-w-[240px]">
+			<div className="flex w-full flex-col gap-2.5">
 				{showSignIn ? (
 					<button
 						type="button"
@@ -86,6 +96,15 @@ export function ErrorState({
 						Try Again
 					</button>
 				)}
+				{showOpenConnections ? (
+					<button
+						type="button"
+						onClick={handleOpenConnections}
+						className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 font-medium text-white transition-all duration-200 hover:bg-white/10 active:bg-white/[0.12] cursor-pointer"
+					>
+						Open Connections
+					</button>
+				) : null}
 			</div>
 		</div>
 	);

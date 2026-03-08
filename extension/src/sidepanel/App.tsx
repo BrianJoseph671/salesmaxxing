@@ -16,6 +16,7 @@ import type {
 } from "./types";
 
 const HAS_COMPLETED_ONBOARDING_KEY = "salesmaxxing_onboarded";
+const SIGN_IN_URL = "https://salesmaxxing.vercel.app/sign-in?next=/";
 
 function readOnboardingFlag(): boolean {
 	try {
@@ -153,6 +154,10 @@ export function App() {
 		setView("leads");
 	}
 
+	function handleSignIn() {
+		chrome.tabs.create({ url: SIGN_IN_URL });
+	}
+
 	// ── Render ──────────────────────────────────────────────────────────────
 
 	function renderView() {
@@ -207,10 +212,9 @@ export function App() {
 			case "error":
 				return (
 					<ErrorState
-						message={
-							qualError ??
-							"Sign in to SalesMAXXing from the extension popup to get started."
-						}
+						message={qualError ?? "Sign in to SalesMAXXing to get started."}
+						type={user ? "extraction-failed" : "auth-expired"}
+						onSignIn={user ? undefined : handleSignIn}
 						onRetry={handleRetry}
 					/>
 				);

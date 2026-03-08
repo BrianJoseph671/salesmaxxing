@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
-const protectedPaths = ["/overview"];
+const protectedPaths = ["/dashboard", "/overview"];
 const publicAuthPaths = ["/sign-in"];
 
 const supabaseUrl =
@@ -55,8 +55,22 @@ export default async function proxy(request: NextRequest) {
 
 	if (isPublicAuthPath && user) {
 		const url = request.nextUrl.clone();
-		url.pathname = "/";
-		url.search = "";
+		const extensionId = request.nextUrl.searchParams.get("extensionId");
+		const next = request.nextUrl.searchParams.get("next");
+
+		if (extensionId) {
+			url.pathname = "/extension-auth";
+			url.search = "";
+			url.searchParams.set("extensionId", extensionId);
+
+			if (next) {
+				url.searchParams.set("next", next);
+			}
+		} else {
+			url.pathname = "/dashboard";
+			url.search = "";
+		}
+
 		return NextResponse.redirect(url);
 	}
 

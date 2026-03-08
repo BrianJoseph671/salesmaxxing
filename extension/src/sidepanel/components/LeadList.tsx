@@ -121,8 +121,8 @@ export function LeadList({
 	return (
 		<div className="flex flex-col min-h-full animate-fade-in">
 			<div className="sticky top-0 z-10 border-b border-white/5 bg-black/80 backdrop-blur-xl">
-				<div className="px-4 pb-4 pt-4">
-					<div className="rounded-[1.75rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.18),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] p-4 shadow-[0_24px_48px_rgba(0,0,0,0.28)]">
+				<div className="px-3 pb-3 pt-3">
+					<div className="rounded-[1.75rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.18),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] p-3.5 shadow-[0_24px_48px_rgba(0,0,0,0.28)]">
 						<div className="flex items-start justify-between gap-3">
 							<div className="min-w-0 flex-1">
 								<div className="flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-zinc-500">
@@ -139,7 +139,7 @@ export function LeadList({
 								</div>
 								<p className="mt-1 text-sm leading-6 text-zinc-400">
 									Ranked against your current qualification brief, with search
-									and score slices carried directly into the sidepanel.
+									and score filters ready to work inside LinkedIn.
 								</p>
 							</div>
 
@@ -175,7 +175,7 @@ export function LeadList({
 							</div>
 						</div>
 
-						<div className="mt-4 grid grid-cols-3 gap-2">
+						<div className="mt-4 grid grid-cols-2 gap-2">
 							<div className="rounded-2xl border border-white/8 bg-black/20 px-3 py-3">
 								<p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-zinc-500">
 									Avg Score
@@ -192,7 +192,7 @@ export function LeadList({
 									{filterCounts.hot}
 								</p>
 							</div>
-							<div className="rounded-2xl border border-white/8 bg-black/20 px-3 py-3">
+							<div className="col-span-2 rounded-2xl border border-white/8 bg-black/20 px-3 py-3">
 								<p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-zinc-500">
 									Outreach Ready
 								</p>
@@ -203,7 +203,7 @@ export function LeadList({
 						</div>
 					</div>
 
-					<div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3">
+					<div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.04] px-3 py-3">
 						<div className="flex items-center gap-2 text-zinc-500">
 							<Search className="size-4 shrink-0" />
 							<input
@@ -253,7 +253,7 @@ export function LeadList({
 			</div>
 
 			{/* Lead cards */}
-			<div className="flex-1 overflow-y-auto px-4 py-3">
+			<div className="flex-1 overflow-y-auto px-3 py-3">
 				<div className="mb-3 flex items-center justify-between px-1">
 					<p className="text-[11px] font-medium uppercase tracking-[0.24em] text-zinc-500">
 						Browse

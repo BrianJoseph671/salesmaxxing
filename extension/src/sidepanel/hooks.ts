@@ -3,6 +3,7 @@ import { syncExtensionSessionFromWeb } from "../lib/app-auth";
 import {
 	getAuthSession,
 	getConnections,
+	getCurrentPage,
 	getOwnProfile,
 	type StoredAuthSession,
 	saveConnections,
@@ -292,21 +293,46 @@ function generateId(): string {
 	});
 }
 
+function buildFallbackProfile(session: StoredAuthSession): LinkedInProfile {
+	return {
+		name: session.user.name ?? session.user.email ?? "LinkedIn user",
+		headline: null,
+		location: null,
+		about: null,
+		profileUrl: null,
+		avatarUrl: null,
+		connectionDegree: null,
+		experience: [],
+		education: [],
+		skills: [],
+		extractedAt: new Date().toISOString(),
+	};
+}
+
 /** Resolve the user's LinkedIn profile from storage or via content script extraction. */
 async function resolveProfile(
 	onProgress: (msg: string) => void,
+	authSession: StoredAuthSession,
 ): Promise<LinkedInProfile> {
 	onProgress("Loading your profile...");
 	const cached = await getOwnProfile();
 	if (cached) return cached;
 
-	onProgress("Extracting your LinkedIn profile...");
+	const currentPage = await getCurrentPage();
+	onProgress(
+		currentPage?.pageType === "profile"
+			? "Extracting your LinkedIn profile..."
+			: "Opening your LinkedIn profile...",
+	);
 	const response = (await chrome.runtime.sendMessage({
 		type: "request-extract-profile",
 	})) as { profile: LinkedInProfile } | { error: string };
 
 	if ("error" in response) {
-		throw new Error(`Profile extraction failed: ${response.error}`);
+		const fallbackProfile = buildFallbackProfile(authSession);
+		await saveOwnProfile(fallbackProfile);
+		onProgress("Using your account details to continue...");
+		return fallbackProfile;
 	}
 
 	await saveOwnProfile(response.profile);
@@ -321,7 +347,12 @@ async function resolveConnections(
 	const cached = await getConnections();
 	if (cached && cached.length > 0) return cached;
 
-	onProgress("Extracting connections from LinkedIn...");
+	const currentPage = await getCurrentPage();
+	onProgress(
+		currentPage?.pageType === "connections"
+			? "Extracting connections from LinkedIn..."
+			: "Opening your LinkedIn connections page...",
+	);
 	const response = (await chrome.runtime.sendMessage({
 		type: "request-extract-connections",
 	})) as { connections: LinkedInConnection[] } | { error: string };
@@ -486,7 +517,7 @@ export function useQualification(
 				}
 
 				// 2. Resolve profile and connections
-				const profile = await resolveProfile(setProgress);
+				const profile = await resolveProfile(setProgress, authSession);
 				const connections = await resolveConnections(setProgress);
 
 				if (connections.length === 0) {

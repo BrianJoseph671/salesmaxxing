@@ -3,6 +3,7 @@
 import { scrollAndExtractConnections } from "./lib/extract-connections";
 import { extractProfile } from "./lib/extract-profile";
 import {
+	getOwnProfileUrl,
 	isConnectionsPage,
 	isProfilePage,
 	isSearchPage,
@@ -54,6 +55,11 @@ chrome.runtime.onMessage.addListener(
 		_sender: chrome.runtime.MessageSender,
 		sendResponse: (response: unknown) => void,
 	) => {
+		if (message.type === "get-own-profile-url") {
+			sendResponse({ profileUrl: getOwnProfileUrl() });
+			return false;
+		}
+
 		if (message.type === "extract-profile") {
 			handleExtractProfile(sendResponse);
 			return true; // keep channel open for async response

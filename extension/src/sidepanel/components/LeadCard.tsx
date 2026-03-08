@@ -116,7 +116,7 @@ function ScoreRing({ score }: { score: number }) {
 	return (
 		<div className={clsx("flex flex-col items-center gap-2", glow)}>
 			<svg
-				className="size-[4.4rem] shrink-0"
+				className="size-[3.75rem] shrink-0"
 				viewBox="0 0 36 36"
 				role="img"
 				aria-label={`Lead score ${String(normalizedScore)}`}
@@ -227,14 +227,14 @@ export function LeadCard({
 			<button
 				type="button"
 				onClick={onToggle}
-				className="w-full cursor-pointer px-4 py-4 text-left"
+				className="w-full cursor-pointer px-3.5 py-4 text-left"
 			>
-				<div className="flex items-start gap-3.5">
-					<div className="flex shrink-0 flex-col items-center gap-3 pt-0.5">
+				<div className="flex items-start gap-3">
+					<div className="flex shrink-0 flex-col items-center gap-2.5 pt-0.5">
 						<span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[0.625rem] font-semibold uppercase tracking-[0.22em] text-zinc-500">
 							#{rank}
 						</span>
-						<div className="relative flex size-11 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06]">
+						<div className="relative flex size-10 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06]">
 							{lead.avatarUrl && !avatarError ? (
 								// biome-ignore lint/performance/noImgElement: extension context, not Next.js
 								<img
@@ -280,13 +280,13 @@ export function LeadCard({
 						</div>
 
 						<div className="mt-3">
-							<p className="truncate text-[1.02rem] font-semibold tracking-tight text-white">
+							<p className="text-[1.02rem] font-semibold tracking-tight text-white [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
 								{lead.name}
 							</p>
-							<p className="mt-1 truncate text-sm font-medium text-zinc-200">
+							<p className="mt-1 text-sm font-medium text-zinc-200 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
 								{lead.title}
 							</p>
-							<p className="mt-1 truncate text-[0.8rem] text-zinc-500">
+							<p className="mt-1 text-[0.8rem] text-zinc-500 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
 								{lead.company}
 							</p>
 						</div>
@@ -326,7 +326,7 @@ export function LeadCard({
 						)}
 					</div>
 
-					<div className="flex shrink-0 flex-col items-center gap-2.5 pt-0.5">
+					<div className="flex shrink-0 flex-col items-center gap-2 pt-0.5">
 						<ScoreRing score={lead.score} />
 						<ChevronDown
 							className={clsx(
