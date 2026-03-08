@@ -1,4 +1,4 @@
-import { useState } from "react";
+import clsx from "clsx";
 import {
 	ChevronDown,
 	ExternalLink,
@@ -8,7 +8,7 @@ import {
 	Users,
 	Zap,
 } from "lucide-react";
-import clsx from "clsx";
+import { useState } from "react";
 import type { QualifiedLead } from "../types";
 
 interface LeadCardProps {
@@ -49,7 +49,8 @@ function scoreColor(score: number) {
 }
 
 function degreeColor(degree: string): string {
-	if (degree === "1st") return "bg-blue-500/15 text-blue-400 border-blue-500/25";
+	if (degree === "1st")
+		return "bg-blue-500/15 text-blue-400 border-blue-500/25";
 	if (degree === "2nd")
 		return "bg-violet-500/15 text-violet-400 border-violet-500/25";
 	return "bg-zinc-500/15 text-zinc-400 border-zinc-500/25";
@@ -95,6 +96,7 @@ export function LeadCard({
 					{/* Avatar */}
 					<div className="relative flex-shrink-0 size-9 rounded-full overflow-hidden bg-white/10 flex items-center justify-center ring-1 ring-white/10">
 						{lead.avatarUrl && !avatarError ? (
+							// biome-ignore lint/performance/noImgElement: extension context, not Next.js
 							<img
 								src={lead.avatarUrl}
 								alt={lead.name}

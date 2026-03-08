@@ -22,13 +22,7 @@ async function buildTailwindCSS() {
 	const inputCss = resolve(extensionDir, "src/sidepanel.css");
 	const outputCss = resolve(outDir, "sidepanel.css");
 
-	const args = [
-		"@tailwindcss/cli",
-		"-i",
-		inputCss,
-		"-o",
-		outputCss,
-	];
+	const args = ["@tailwindcss/cli", "-i", inputCss, "-o", outputCss];
 
 	if (!isWatch) {
 		args.push("--minify");

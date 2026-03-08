@@ -1,15 +1,18 @@
-import { useState } from "react";
-import type { QualificationConfig, SidePanelView } from "./types";
-import { useAuth, useLeads, useQualification } from "./hooks";
-
-// Components created by other agents — imports will resolve after they finish
-import { WelcomeScreen } from "./components/WelcomeScreen";
-import { ModeSelector } from "./components/ModeSelector";
+import { useCallback, useState } from "react";
 import { CustomQualForm } from "./components/CustomQualForm";
-import { LeadList } from "./components/LeadList";
-import { LoadingState } from "./components/LoadingState";
 import { EmptyState } from "./components/EmptyState";
 import { ErrorState } from "./components/ErrorState";
+import { InMailComposer } from "./components/InMailComposer";
+import { LeadList } from "./components/LeadList";
+import { LoadingState } from "./components/LoadingState";
+import { ModeSelector } from "./components/ModeSelector";
+import { WelcomeScreen } from "./components/WelcomeScreen";
+import { useAuth, useLeads, useQualification } from "./hooks";
+import type {
+	QualificationConfig,
+	QualifiedLead,
+	SidePanelView,
+} from "./types";
 
 const HAS_COMPLETED_ONBOARDING_KEY = "salesmaxxing_onboarded";
 
@@ -32,11 +35,25 @@ function writeOnboardingFlag() {
 export function App() {
 	const { user, isLoading: authLoading } = useAuth();
 	const { leads, refresh: refreshLeads } = useLeads();
-	const { isQualifying, progress, startQualification } = useQualification();
 
-	const initialView: SidePanelView = "loading";
-	const [view, setView] = useState<SidePanelView>(initialView);
+	const [view, setView] = useState<SidePanelView>("loading");
 	const [hasResolved, setHasResolved] = useState(false);
+	const [composerLead, setComposerLead] = useState<QualifiedLead | null>(null);
+	const [qualError, setQualError] = useState<string | null>(null);
+
+	const handleQualificationComplete = useCallback(
+		(newLeads: QualifiedLead[]) => {
+			refreshLeads();
+			setView(newLeads.length > 0 ? "leads" : "empty");
+		},
+		[refreshLeads],
+	);
+
+	const {
+		progress,
+		error: qualificationError,
+		startQualification,
+	} = useQualification({ onComplete: handleQualificationComplete });
 
 	// Resolve initial view once auth check completes
 	if (!hasResolved && !authLoading) {
@@ -49,6 +66,12 @@ export function App() {
 		} else {
 			setView("welcome");
 		}
+	}
+
+	// If qualification fails, show error
+	if (qualificationError && view === "qualifying") {
+		setQualError(qualificationError);
+		setView("error");
 	}
 
 	// ── Navigation callbacks ────────────────────────────────────────────────
@@ -84,11 +107,22 @@ export function App() {
 	}
 
 	function handleRetry() {
+		setQualError(null);
 		setView(user ? "mode-select" : "error");
 	}
 
 	function handleRequalify() {
 		setView("mode-select");
+	}
+
+	function handleDraftInMail(lead: QualifiedLead) {
+		setComposerLead(lead);
+		setView("composer");
+	}
+
+	function handleBackFromComposer() {
+		setComposerLead(null);
+		setView("leads");
 	}
 
 	// ── Render ──────────────────────────────────────────────────────────────
@@ -99,15 +133,17 @@ export function App() {
 				return <LoadingState message="Checking your session..." />;
 
 			case "welcome":
-				return (
-					<WelcomeScreen
-						user={user}
-						onContinue={handleWelcomeContinue}
-					/>
-				);
+				if (!user) return null;
+				return <WelcomeScreen user={user} onContinue={handleWelcomeContinue} />;
 
 			case "mode-select":
-				return <ModeSelector onSelect={handleModeSelected} />;
+				return (
+					<ModeSelector
+						onSelectAutomatic={() => handleModeSelected("automatic")}
+						onSelectCustom={() => handleModeSelected("custom")}
+						onBack={() => setView("welcome")}
+					/>
+				);
 
 			case "custom-form":
 				return (
@@ -126,20 +162,26 @@ export function App() {
 						leads={leads}
 						onRefresh={refreshLeads}
 						onRequalify={handleRequalify}
+						onDraftInMail={handleDraftInMail}
 					/>
 				);
 
-			case "empty":
+			case "composer":
+				if (!composerLead) return null;
 				return (
-					<EmptyState
-						onRequalify={handleRequalify}
-					/>
+					<InMailComposer lead={composerLead} onBack={handleBackFromComposer} />
 				);
+
+			case "empty":
+				return <EmptyState onRequalify={handleRequalify} />;
 
 			case "error":
 				return (
 					<ErrorState
-						message="Sign in to SalesMAXXing from the extension popup to get started."
+						message={
+							qualError ??
+							"Sign in to SalesMAXXing from the extension popup to get started."
+						}
 						onRetry={handleRetry}
 					/>
 				);
@@ -149,9 +191,5 @@ export function App() {
 		}
 	}
 
-	return (
-		<div className="min-h-screen bg-black text-white">
-			{renderView()}
-		</div>
-	);
+	return <div className="min-h-screen bg-black text-white">{renderView()}</div>;
 }

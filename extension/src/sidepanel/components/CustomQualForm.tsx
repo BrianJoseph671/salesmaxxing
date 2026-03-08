@@ -187,27 +187,29 @@ export function CustomQualForm({
 				/>
 
 				{/* Company URLs */}
-				<div>
-					<label className="block text-sm text-zinc-400 mb-2">
+				<label className="block">
+					<span className="block text-sm text-zinc-400 mb-2">
 						Target Companies
-					</label>
+					</span>
 					<textarea
 						value={companyUrls}
 						onChange={(e) => setCompanyUrls(e.target.value)}
-						placeholder={"linkedin.com/company/acme\nlinkedin.com/company/globex"}
+						placeholder={
+							"linkedin.com/company/acme\nlinkedin.com/company/globex"
+						}
 						rows={3}
 						className={clsx(inputClasses, "resize-none")}
 					/>
 					<p className="text-xs text-zinc-600 mt-1">
 						LinkedIn company URLs, one per line
 					</p>
-				</div>
+				</label>
 
 				{/* ICP Notes */}
-				<div>
-					<label className="block text-sm text-zinc-400 mb-2">
+				<label className="block">
+					<span className="block text-sm text-zinc-400 mb-2">
 						Ideal Customer Profile
-					</label>
+					</span>
 					<textarea
 						value={icpNotes}
 						onChange={(e) => setIcpNotes(e.target.value)}
@@ -215,7 +217,7 @@ export function CustomQualForm({
 						rows={4}
 						className={clsx(inputClasses, "resize-none")}
 					/>
-				</div>
+				</label>
 			</div>
 
 			{/* Submit */}
