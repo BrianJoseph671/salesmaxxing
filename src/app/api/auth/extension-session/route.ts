@@ -1,9 +1,17 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import {
+	applyExtensionCors,
+	createExtensionPreflightResponse,
+} from "@/src/lib/http/cors";
 import { createRlsServerClient } from "@/src/lib/supabase/auth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function OPTIONS(request: NextRequest) {
+	return createExtensionPreflightResponse(request);
+}
+
+export async function GET(request: NextRequest) {
 	try {
 		const supabase = await createRlsServerClient();
 		const [
@@ -24,7 +32,7 @@ export async function GET() {
 				{ status: 401 },
 			);
 			response.headers.set("Cache-Control", "no-store");
-			return response;
+			return applyExtensionCors(request, response);
 		}
 
 		const response = NextResponse.json({
@@ -46,13 +54,13 @@ export async function GET() {
 		});
 
 		response.headers.set("Cache-Control", "no-store");
-		return response;
+		return applyExtensionCors(request, response);
 	} catch {
 		const response = NextResponse.json(
 			{ error: "Could not load extension session" },
 			{ status: 500 },
 		);
 		response.headers.set("Cache-Control", "no-store");
-		return response;
+		return applyExtensionCors(request, response);
 	}
 }

@@ -1,117 +1,19 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import {
+	APP_URL,
+	type AuthStatus,
+	probeAuthStatus,
+	readStoredAuthStatus,
+	syncExtensionSessionFromWeb,
+} from "./lib/app-auth";
 import { ErrorBoundary } from "./sidepanel/components/ErrorBoundary";
-
-const APP_URL = "https://salesmaxxing.vercel.app";
 
 type ActiveTabState = {
 	id?: number;
 	isLinkedIn: boolean;
 	url?: string;
 };
-
-type AuthStatus = {
-	appUrl: string;
-	isAuthenticated: boolean;
-	source: "extension" | "web";
-	user: {
-		email: string | null;
-		id: string;
-		name: string | null;
-	} | null;
-};
-
-type StoredExtensionSession = {
-	accessToken: string;
-	appUrl: string;
-	expiresAt: number | null;
-	expiresIn: number | null;
-	refreshToken: string;
-	syncedAt: string;
-	tokenType: string;
-	user: AuthStatus["user"];
-};
-
-async function fetchJsonWithTimeout(input: string, timeoutMs: number) {
-	const controller = new AbortController();
-	const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
-
-	try {
-		return await fetch(input, {
-			cache: "no-store",
-			credentials: "include",
-			signal: controller.signal,
-		});
-	} finally {
-		window.clearTimeout(timeoutId);
-	}
-}
-
-async function probeAuthStatus(appUrl: string): Promise<AuthStatus | null> {
-	try {
-		const response = await fetchJsonWithTimeout(
-			`${appUrl}/api/auth/status`,
-			1500,
-		);
-
-		if (!response.ok) {
-			return null;
-		}
-
-		const payload = (await response.json()) as {
-			isAuthenticated?: boolean;
-			user?: AuthStatus["user"];
-		};
-
-		return {
-			appUrl,
-			isAuthenticated: payload.isAuthenticated === true,
-			source: "web",
-			user: payload.user ?? null,
-		};
-	} catch {
-		return null;
-	}
-}
-
-function isStoredExtensionSession(
-	value: unknown,
-): value is StoredExtensionSession {
-	if (!value || typeof value !== "object") {
-		return false;
-	}
-
-	const candidate = value as Partial<StoredExtensionSession>;
-	return (
-		typeof candidate.accessToken === "string" &&
-		typeof candidate.appUrl === "string" &&
-		typeof candidate.refreshToken === "string" &&
-		typeof candidate.user?.id === "string"
-	);
-}
-
-async function readStoredAuthStatus(): Promise<AuthStatus | null> {
-	const { authSession } = await chrome.storage.local.get("authSession");
-
-	if (!isStoredExtensionSession(authSession)) {
-		return null;
-	}
-
-	if (
-		typeof authSession.expiresAt === "number" &&
-		authSession.expiresAt * 1000 <= Date.now()
-	) {
-		await chrome.storage.local.remove("authSession");
-		return null;
-	}
-
-	return {
-		appUrl: authSession.appUrl,
-		isAuthenticated: true,
-		source: "extension",
-		user: authSession.user,
-	};
-}
 
 function Popup() {
 	const [activeTab, setActiveTab] = useState<ActiveTabState>({
@@ -125,21 +27,27 @@ function Popup() {
 	useEffect(() => {
 		const loadPopupState = async () => {
 			try {
-				const [tabs, authCandidates, storedAuthStatus] = await Promise.all([
+				const [tabs, webAuthStatus, storedAuthStatus] = await Promise.all([
 					chrome.tabs.query({
 						active: true,
 						currentWindow: true,
 					}),
-					Promise.all([probeAuthStatus(APP_URL)]),
+					probeAuthStatus(APP_URL),
 					readStoredAuthStatus(),
 				]);
 				const tab = tabs[0];
 				const url = tab?.url;
-				const authResult =
-					authCandidates.find((candidate) => candidate?.isAuthenticated) ??
-					storedAuthStatus ??
-					authCandidates.find((candidate) => candidate) ??
-					null;
+				let authResult = storedAuthStatus;
+
+				if (!authResult && webAuthStatus?.isAuthenticated) {
+					authResult =
+						(await syncExtensionSessionFromWeb(webAuthStatus.appUrl)) ??
+						webAuthStatus;
+				}
+
+				if (!authResult) {
+					authResult = webAuthStatus;
+				}
 
 				setActiveTab({
 					id: tab?.id,
@@ -185,6 +93,22 @@ function Popup() {
 		setIsOpening(true);
 
 		try {
+			if (authStatus.source === "web") {
+				const syncedAuthStatus = await syncExtensionSessionFromWeb(
+					authStatus.appUrl,
+				);
+
+				if (!syncedAuthStatus) {
+					setError(
+						"SalesMAXXing is signed in on the web, but the extension session has not synced yet. Finish the sign-in tab, then reopen the popup.",
+					);
+					setIsOpening(false);
+					return;
+				}
+
+				setAuthStatus(syncedAuthStatus);
+			}
+
 			await chrome.sidePanel.open({ tabId: activeTab.id });
 			window.close();
 		} catch {

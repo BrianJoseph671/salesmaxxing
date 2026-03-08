@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { syncExtensionSessionFromWeb } from "../lib/app-auth";
 import {
 	getAuthSession,
 	getConnections,
@@ -50,7 +51,22 @@ export function useAuth(): AuthState {
 				) {
 					setUser(sessionToUserInfo(authSession));
 				} else {
-					setUser(null);
+					const syncedAuth = await syncExtensionSessionFromWeb();
+					if (cancelled) return;
+
+					if (syncedAuth?.isAuthenticated && syncedAuth.user?.id) {
+						setUser({
+							avatarUrl: "",
+							email: syncedAuth.user.email ?? "",
+							id: syncedAuth.user.id,
+							name:
+								syncedAuth.user.name ??
+								syncedAuth.user.email ??
+								"LinkedIn User",
+						});
+					} else {
+						setUser(null);
+					}
 				}
 			} catch {
 				if (!cancelled) setUser(null);
