@@ -510,8 +510,8 @@ Leads and intros persist across sessions.
 - [x] 7.5 — `intros`: id, user_id, lead_id, message, tone, version, created_at
 - [x] 7.6 — RLS policies: users only access their own rows
 - [x] 7.7 — Build `/api/leads` CRUD routes (GET list, POST save, PATCH status)
-- [ ] 7.8 — Side panel: load saved leads from Supabase on open
-- [ ] 7.9 — Side panel: lead status tracking (new, contacted, replied, qualified)
+- [x] 7.8 — Side panel: load saved leads from Supabase on open
+- [x] 7.9 — Side panel: lead status tracking (new, contacted, replied, qualified)
 - [ ] 7.10 — Verify: close/reopen extension, leads + intros persist
 
 **Checkpoint: Data survives browser restarts. Leads are trackable.**

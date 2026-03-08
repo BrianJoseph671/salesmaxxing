@@ -1,5 +1,12 @@
 export type Tone = "professional" | "casual" | "mutual_connection";
 
+export type LeadStatus =
+	| "new"
+	| "contacted"
+	| "replied"
+	| "qualified"
+	| "disqualified";
+
 export type SidePanelView =
 	| "loading" // Initial auth check
 	| "welcome" // Onboarding: Welcome, [name]
@@ -33,6 +40,7 @@ export interface QualifiedLead {
 	keySignals: string[];
 	talkingPoints: string[];
 	profileHighlights: string[];
+	status?: LeadStatus;
 }
 
 export interface QualificationConfig {

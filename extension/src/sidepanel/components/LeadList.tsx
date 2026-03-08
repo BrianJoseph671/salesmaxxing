@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { RefreshCw, SlidersHorizontal, Trophy } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { QualifiedLead } from "../types";
+import type { LeadStatus, QualifiedLead } from "../types";
 import { LeadCard } from "./LeadCard";
 
 interface LeadListProps {
@@ -9,6 +9,7 @@ interface LeadListProps {
 	onRefresh: () => void;
 	onRequalify: () => void;
 	onDraftInMail?: (lead: QualifiedLead) => void;
+	onUpdateStatus?: (leadId: string, status: LeadStatus) => void;
 	isRefreshing?: boolean;
 }
 
@@ -21,6 +22,7 @@ export function LeadList({
 	onRefresh,
 	onRequalify,
 	onDraftInMail,
+	onUpdateStatus,
 	isRefreshing = false,
 }: LeadListProps) {
 	const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -111,6 +113,7 @@ export function LeadList({
 							onToggle={() => handleToggle(lead.id)}
 							onViewProfile={handleViewProfile}
 							onDraftInMail={handleDraftInMail}
+							onUpdateStatus={onUpdateStatus}
 						/>
 					))}
 				</div>

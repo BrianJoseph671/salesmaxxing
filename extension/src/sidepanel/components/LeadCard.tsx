@@ -9,7 +9,7 @@ import {
 	Zap,
 } from "lucide-react";
 import { useState } from "react";
-import type { QualifiedLead } from "../types";
+import type { LeadStatus, QualifiedLead } from "../types";
 
 interface LeadCardProps {
 	lead: QualifiedLead;
@@ -18,6 +18,7 @@ interface LeadCardProps {
 	onToggle: () => void;
 	onViewProfile: (url: string) => void;
 	onDraftInMail: (lead: QualifiedLead) => void;
+	onUpdateStatus?: (leadId: string, status: LeadStatus) => void;
 }
 
 function getInitials(fullName: string): string {
@@ -56,6 +57,45 @@ function degreeColor(degree: string): string {
 	return "bg-zinc-500/15 text-zinc-400 border-zinc-500/25";
 }
 
+const STATUS_CONFIG: Record<
+	LeadStatus,
+	{ label: string; color: string; dotColor: string }
+> = {
+	new: {
+		label: "New",
+		color: "text-zinc-400 bg-zinc-500/15 border-zinc-500/25",
+		dotColor: "bg-zinc-400",
+	},
+	contacted: {
+		label: "Contacted",
+		color: "text-blue-400 bg-blue-500/15 border-blue-500/25",
+		dotColor: "bg-blue-400",
+	},
+	replied: {
+		label: "Replied",
+		color: "text-emerald-400 bg-emerald-500/15 border-emerald-500/25",
+		dotColor: "bg-emerald-400",
+	},
+	qualified: {
+		label: "Qualified",
+		color: "text-amber-400 bg-amber-500/15 border-amber-500/25",
+		dotColor: "bg-amber-400",
+	},
+	disqualified: {
+		label: "Disqualified",
+		color: "text-red-400 bg-red-500/15 border-red-500/25",
+		dotColor: "bg-red-400",
+	},
+};
+
+const ALL_STATUSES: LeadStatus[] = [
+	"new",
+	"contacted",
+	"replied",
+	"qualified",
+	"disqualified",
+];
+
 function openProfile(url: string) {
 	chrome.tabs.create({ url });
 }
@@ -67,10 +107,13 @@ export function LeadCard({
 	onToggle,
 	onViewProfile,
 	onDraftInMail,
+	onUpdateStatus,
 }: LeadCardProps) {
 	const [avatarError, setAvatarError] = useState(false);
 	const initials = getInitials(lead.name);
 	const colors = scoreColor(lead.score);
+	const currentStatus = lead.status ?? "new";
+	const statusCfg = STATUS_CONFIG[currentStatus];
 
 	return (
 		<div
@@ -123,6 +166,24 @@ export function LeadCard({
 
 					{/* Right side: badges + chevron */}
 					<div className="flex items-center gap-2 flex-shrink-0">
+						{/* Status badge */}
+						{currentStatus !== "new" && (
+							<span
+								className={clsx(
+									"text-[10px] font-medium px-1.5 py-0.5 rounded-md border flex items-center gap-1",
+									statusCfg.color,
+								)}
+							>
+								<span
+									className={clsx(
+										"size-1.5 rounded-full flex-shrink-0",
+										statusCfg.dotColor,
+									)}
+								/>
+								{statusCfg.label}
+							</span>
+						)}
+
 						{/* Connection degree */}
 						<span
 							className={clsx(
@@ -255,6 +316,45 @@ export function LeadCard({
 										</li>
 									))}
 								</ol>
+							</div>
+						)}
+
+						{/* Status selector */}
+						{onUpdateStatus && (
+							<div className="border-t border-white/5 pt-3.5 mt-3.5">
+								<h4 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">
+									Status
+								</h4>
+								<div className="flex flex-wrap gap-1.5">
+									{ALL_STATUSES.map((s) => {
+										const cfg = STATUS_CONFIG[s];
+										const isActive = currentStatus === s;
+										return (
+											<button
+												key={s}
+												type="button"
+												onClick={(e) => {
+													e.stopPropagation();
+													onUpdateStatus(lead.id, s);
+												}}
+												className={clsx(
+													"text-[11px] font-medium px-2.5 py-1 rounded-lg border transition-all duration-200 cursor-pointer flex items-center gap-1.5",
+													isActive
+														? cfg.color
+														: "text-zinc-500 bg-white/[0.04] border-white/[0.06] hover:bg-white/[0.08] hover:text-zinc-300",
+												)}
+											>
+												<span
+													className={clsx(
+														"size-1.5 rounded-full flex-shrink-0",
+														isActive ? cfg.dotColor : "bg-zinc-600",
+													)}
+												/>
+												{cfg.label}
+											</button>
+										);
+									})}
+								</div>
 							</div>
 						)}
 

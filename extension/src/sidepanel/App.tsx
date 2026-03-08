@@ -34,7 +34,7 @@ function writeOnboardingFlag() {
 
 export function App() {
 	const { user, isLoading: authLoading } = useAuth();
-	const { leads, refresh: refreshLeads } = useLeads();
+	const { leads, refresh: refreshLeads, updateLeadStatus } = useLeads();
 
 	const [view, setView] = useState<SidePanelView>("loading");
 	const [hasResolved, setHasResolved] = useState(false);
@@ -163,6 +163,7 @@ export function App() {
 						onRefresh={refreshLeads}
 						onRequalify={handleRequalify}
 						onDraftInMail={handleDraftInMail}
+						onUpdateStatus={updateLeadStatus}
 					/>
 				);
 

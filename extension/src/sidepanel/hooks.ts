@@ -8,7 +8,12 @@ import {
 	saveOwnProfile,
 } from "../lib/storage";
 import type { LinkedInConnection, LinkedInProfile } from "../lib/types";
-import type { QualificationConfig, QualifiedLead, UserInfo } from "./types";
+import type {
+	LeadStatus,
+	QualificationConfig,
+	QualifiedLead,
+	UserInfo,
+} from "./types";
 
 // ── Auth ────────────────────────────────────────────────────────────────────
 
@@ -89,6 +94,71 @@ interface LeadsState {
 	leads: QualifiedLead[];
 	isLoading: boolean;
 	refresh: () => void;
+	updateLeadStatus: (leadId: string, status: LeadStatus) => void;
+}
+
+/** Try fetching leads from Supabase when local storage is empty. */
+async function fetchLeadsFromSupabase(
+	session: StoredAuthSession,
+): Promise<QualifiedLead[] | null> {
+	try {
+		const response = await fetch(`${session.appUrl}/api/leads`, {
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${session.accessToken}`,
+			},
+		});
+		if (!response.ok) return null;
+
+		const data: unknown = await response.json();
+		if (
+			!data ||
+			typeof data !== "object" ||
+			!("leads" in data) ||
+			!Array.isArray((data as { leads: unknown }).leads)
+		) {
+			return null;
+		}
+
+		const apiLeads = (data as { leads: Record<string, unknown>[] }).leads;
+		if (apiLeads.length === 0) return null;
+
+		return apiLeads.map((lead) => ({
+			id: typeof lead.id === "string" ? lead.id : generateId(),
+			name: typeof lead.name === "string" ? lead.name : "",
+			title: typeof lead.title === "string" ? lead.title : "",
+			company: typeof lead.company === "string" ? lead.company : "",
+			score: typeof lead.score === "number" ? lead.score : 0,
+			connectionDegree:
+				typeof lead.connectionDegree === "string"
+					? lead.connectionDegree
+					: "1st",
+			location: typeof lead.location === "string" ? lead.location : "",
+			profileUrl:
+				typeof lead.profileUrl === "string"
+					? lead.profileUrl
+					: typeof lead.linkedinUrl === "string"
+						? lead.linkedinUrl
+						: "",
+			avatarUrl:
+				typeof lead.avatarUrl === "string" ? lead.avatarUrl : undefined,
+			justification:
+				typeof lead.justification === "string" ? lead.justification : "",
+			keySignals: Array.isArray(lead.keySignals)
+				? (lead.keySignals as string[])
+				: [],
+			talkingPoints: Array.isArray(lead.talkingPoints)
+				? (lead.talkingPoints as string[])
+				: [],
+			profileHighlights: Array.isArray(lead.profileHighlights)
+				? (lead.profileHighlights as string[])
+				: [],
+			status:
+				typeof lead.status === "string" ? (lead.status as LeadStatus) : "new",
+		}));
+	} catch {
+		return null;
+	}
 }
 
 export function useLeads(): LeadsState {
@@ -98,13 +168,31 @@ export function useLeads(): LeadsState {
 	const loadLeads = useCallback(async () => {
 		setIsLoading(true);
 		try {
+			// 1. Read from chrome.storage (fast, local)
 			const result = await chrome.storage.local.get("qualifiedLeads");
 			const stored: unknown = result.qualifiedLeads;
 			if (Array.isArray(stored) && stored.length > 0) {
 				setLeads(stored as QualifiedLead[]);
-			} else {
-				setLeads([]);
+				setIsLoading(false);
+				return;
 			}
+
+			// 2. Local storage empty — try fetching from Supabase
+			const authSession = await getAuthSession();
+			if (authSession) {
+				const supabaseLeads = await fetchLeadsFromSupabase(authSession);
+				if (supabaseLeads && supabaseLeads.length > 0) {
+					// 3. Save to chrome.storage and update state
+					await chrome.storage.local.set({
+						qualifiedLeads: supabaseLeads,
+					});
+					setLeads(supabaseLeads);
+					setIsLoading(false);
+					return;
+				}
+			}
+
+			setLeads([]);
 		} catch {
 			setLeads([]);
 		} finally {
@@ -120,7 +208,38 @@ export function useLeads(): LeadsState {
 		void loadLeads();
 	}, [loadLeads]);
 
-	return { leads, isLoading, refresh };
+	const updateLeadStatus = useCallback((leadId: string, status: LeadStatus) => {
+		setLeads((prev) => {
+			const updated = prev.map((lead) =>
+				lead.id === leadId ? { ...lead, status } : lead,
+			);
+
+			// Persist to chrome.storage
+			void chrome.storage.local.set({ qualifiedLeads: updated });
+
+			// Fire-and-forget PATCH to Supabase
+			void (async () => {
+				try {
+					const authSession = await getAuthSession();
+					if (!authSession) return;
+					await fetch(`${authSession.appUrl}/api/leads`, {
+						method: "PATCH",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${authSession.accessToken}`,
+						},
+						body: JSON.stringify({ id: leadId, status }),
+					});
+				} catch {
+					// Non-critical — local state is already updated
+				}
+			})();
+
+			return updated;
+		});
+	}, []);
+
+	return { leads, isLoading, refresh, updateLeadStatus };
 }
 
 // ── Qualification ───────────────────────────────────────────────────────────
