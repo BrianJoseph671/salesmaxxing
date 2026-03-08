@@ -180,7 +180,7 @@ chrome.runtime.onMessageExternal.addListener(
 // Internal message routing (content script ↔ side panel)
 // ---------------------------------------------------------------------------
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 	// Messages from content script → store state / forward to side panel
 	if (isContentScriptMessage(message)) {
 		if (message.type === "page-changed") {

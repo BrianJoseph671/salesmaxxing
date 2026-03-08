@@ -17,6 +17,37 @@ const sharedConfig: Partial<BuildConfig> = {
 	sourcemap: isWatch ? "linked" : "none",
 };
 
+// Compile Tailwind CSS for the side panel
+async function buildTailwindCSS() {
+	const inputCss = resolve(extensionDir, "src/sidepanel.css");
+	const outputCss = resolve(outDir, "sidepanel.css");
+
+	const args = [
+		"@tailwindcss/cli",
+		"-i",
+		inputCss,
+		"-o",
+		outputCss,
+	];
+
+	if (!isWatch) {
+		args.push("--minify");
+	}
+
+	const proc = Bun.spawn(["bunx", ...args], {
+		cwd: resolve(import.meta.dir, ".."),
+		stdout: "pipe",
+		stderr: "pipe",
+	});
+
+	const exitCode = await proc.exited;
+
+	if (exitCode !== 0) {
+		const stderr = await new Response(proc.stderr).text();
+		throw new Error(`Tailwind CSS build failed:\n${stderr}`);
+	}
+}
+
 // Build all extension entry points
 async function buildExtension() {
 	const results = await Promise.all([
@@ -43,6 +74,9 @@ async function buildExtension() {
 	]);
 
 	const allSuccess = results.every((r) => r.success);
+
+	// Build Tailwind CSS for side panel
+	await buildTailwindCSS();
 
 	// Copy static files to dist
 	cpSync(

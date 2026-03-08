@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
+import { streamText } from "ai";
+import { type NextRequest, NextResponse } from "next/server";
 import {
 	applyExtensionCors,
 	createExtensionPreflightResponse,
@@ -119,7 +119,9 @@ Write the InMail now.`;
 }
 
 function isValidTone(tone: unknown): tone is Tone {
-	return tone === "professional" || tone === "casual" || tone === "mutual_connection";
+	return (
+		tone === "professional" || tone === "casual" || tone === "mutual_connection"
+	);
 }
 
 function isValidRequest(body: unknown): body is GenerateIntroRequest {
@@ -127,12 +129,14 @@ function isValidRequest(body: unknown): body is GenerateIntroRequest {
 	const b = body as Record<string, unknown>;
 	if (!b.repProfile || typeof b.repProfile !== "object") return false;
 	if (!b.leadProfile || typeof b.leadProfile !== "object") return false;
-	if (!b.qualificationContext || typeof b.qualificationContext !== "object") return false;
+	if (!b.qualificationContext || typeof b.qualificationContext !== "object")
+		return false;
 	if (!isValidTone(b.tone)) return false;
 
 	const rep = b.repProfile as Record<string, unknown>;
 	const lead = b.leadProfile as Record<string, unknown>;
-	if (typeof rep.name !== "string" || typeof lead.name !== "string") return false;
+	if (typeof rep.name !== "string" || typeof lead.name !== "string")
+		return false;
 
 	return true;
 }
@@ -155,7 +159,10 @@ export async function POST(request: NextRequest) {
 		const body: unknown = await request.json();
 		if (!isValidRequest(body)) {
 			const response = NextResponse.json(
-				{ error: "Invalid request. Required: repProfile, leadProfile, qualificationContext, tone." },
+				{
+					error:
+						"Invalid request. Required: repProfile, leadProfile, qualificationContext, tone.",
+				},
 				{ status: 400 },
 			);
 			return applyExtensionCors(request, response, "POST,OPTIONS");
@@ -175,10 +182,14 @@ export async function POST(request: NextRequest) {
 		});
 
 		const response = result.toTextStreamResponse();
-		return applyExtensionCors(request, new NextResponse(response.body, {
-			status: response.status,
-			headers: response.headers,
-		}), "POST,OPTIONS");
+		return applyExtensionCors(
+			request,
+			new NextResponse(response.body, {
+				status: response.status,
+				headers: response.headers,
+			}),
+			"POST,OPTIONS",
+		);
 	} catch {
 		const response = NextResponse.json(
 			{ error: "Failed to generate intro" },

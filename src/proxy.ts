@@ -55,7 +55,7 @@ export default async function proxy(request: NextRequest) {
 
 	if (isPublicAuthPath && user) {
 		const url = request.nextUrl.clone();
-		url.pathname = "/overview";
+		url.pathname = "/";
 		url.search = "";
 		return NextResponse.redirect(url);
 	}

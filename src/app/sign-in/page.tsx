@@ -52,8 +52,8 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 					Sign in to SalesMAXXing
 				</h1>
 				<p className="mt-4 text-base leading-7 text-zinc-400">
-					This flow reuses the existing Supabase auth project for speed while
-					we validate the extension and lead qualification flow in production.
+					This flow reuses the existing Supabase auth project for speed while we
+					validate the extension and lead qualification flow in production.
 				</p>
 				{extensionId ? (
 					<p className="mt-4 text-sm leading-6 text-zinc-500">
