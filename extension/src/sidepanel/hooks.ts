@@ -3,6 +3,7 @@ import {
 	getAuthSession,
 	getConnections,
 	getOwnProfile,
+	type StoredAuthSession,
 	saveConnections,
 	saveOwnProfile,
 } from "../lib/storage";
@@ -298,6 +299,35 @@ function mapApiLeads(
 	});
 }
 
+/** Persist leads to Supabase via /api/leads. Fire-and-forget. */
+async function persistLeadsToSupabase(
+	session: StoredAuthSession,
+	apiLeads: ApiLead[],
+): Promise<void> {
+	try {
+		await fetch(`${session.appUrl}/api/leads`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${session.accessToken}`,
+			},
+			body: JSON.stringify({
+				leads: apiLeads.map((lead) => ({
+					linkedinUrl: lead.profileUrl,
+					name: lead.name,
+					headline: lead.headline,
+					score: lead.score,
+					justification: lead.justification,
+					keySignals: lead.keySignals,
+					talkingPoints: lead.talkingPoints,
+				})),
+			}),
+		});
+	} catch {
+		// Non-critical — leads are already saved locally in chrome.storage
+	}
+}
+
 export function useQualification(
 	options?: QualificationOptions,
 ): QualificationState {
@@ -379,9 +409,12 @@ export function useQualification(
 					return;
 				}
 
-				// 5. Map, save, and notify
+				// 5. Map, save locally, and persist to Supabase
 				const qualifiedLeads = mapApiLeads(parsed.leads, connections);
 				await chrome.storage.local.set({ qualifiedLeads });
+
+				// Fire-and-forget: persist leads to Supabase
+				void persistLeadsToSupabase(authSession, parsed.leads);
 
 				setIsQualifying(false);
 				setProgress("");

@@ -450,7 +450,7 @@ Claude analyzes the user's network and returns ranked leads.
 - [x] 4.6 — Custom mode: send user criteria + connections → Claude filters + ranks
 - [x] 4.7 — Define response schema (name, score 0-100, justification, key signals, talking points)
 - [x] 4.8 — Implement streaming with Vercel AI SDK `streamText()` for real-time results
-- [ ] 4.9 — Save qualified leads to Supabase `leads` table
+- [x] 4.9 — Save qualified leads to Supabase `leads` table
 - [ ] 4.10 — Verify: send test data to API, get back ranked leads with justifications
 
 **Checkpoint: API takes connections + context, returns AI-ranked leads.**
@@ -509,7 +509,7 @@ Leads and intros persist across sessions.
 - [x] 7.4 — `leads`: id, user_id, linkedin_url, profile_data, score, justification, status
 - [x] 7.5 — `intros`: id, user_id, lead_id, message, tone, version, created_at
 - [x] 7.6 — RLS policies: users only access their own rows
-- [ ] 7.7 — Build `/api/leads` CRUD routes (GET list, POST save, PATCH status)
+- [x] 7.7 — Build `/api/leads` CRUD routes (GET list, POST save, PATCH status)
 - [ ] 7.8 — Side panel: load saved leads from Supabase on open
 - [ ] 7.9 — Side panel: lead status tracking (new, contacted, replied, qualified)
 - [ ] 7.10 — Verify: close/reopen extension, leads + intros persist
