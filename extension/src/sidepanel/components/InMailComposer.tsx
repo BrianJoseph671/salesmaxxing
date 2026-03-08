@@ -328,6 +328,8 @@ export function InMailComposer({ lead, onBack }: InMailComposerProps) {
 					) : (
 						<div className="relative">
 							<textarea
+								id="inmail-draft"
+								name="inmail-draft"
 								ref={textareaRef}
 								value={draft}
 								onChange={(e) => setDraft(e.target.value)}

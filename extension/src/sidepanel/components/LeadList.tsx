@@ -207,6 +207,8 @@ export function LeadList({
 						<div className="flex items-center gap-2 text-zinc-500">
 							<Search className="size-4 shrink-0" />
 							<input
+								id="lead-search"
+								name="lead-search"
 								type="text"
 								value={query}
 								onChange={(event) => setQuery(event.target.value)}

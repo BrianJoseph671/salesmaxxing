@@ -10,13 +10,20 @@ interface CustomQualFormProps {
 }
 
 interface TagInputProps {
+	id: string;
 	label: string;
 	placeholder: string;
 	tags: string[];
 	onTagsChange: (tags: string[]) => void;
 }
 
-function TagInput({ label, placeholder, tags, onTagsChange }: TagInputProps) {
+function TagInput({
+	id,
+	label,
+	placeholder,
+	tags,
+	onTagsChange,
+}: TagInputProps) {
 	const [inputValue, setInputValue] = useState("");
 
 	const addTags = useCallback(
@@ -88,6 +95,8 @@ function TagInput({ label, placeholder, tags, onTagsChange }: TagInputProps) {
 					</span>
 				))}
 				<input
+					id={id}
+					name={id}
 					type="text"
 					value={inputValue}
 					onChange={(e) => setInputValue(e.target.value)}
@@ -189,6 +198,7 @@ export function CustomQualForm({
 			<div className="flex-1 overflow-y-auto -mx-1 px-1 space-y-5 mb-6">
 				{/* Keywords */}
 				<TagInput
+					id="qualification-keywords"
 					label="Keywords"
 					placeholder="VP Engineering, Series B, AI/ML..."
 					tags={keywords}
@@ -197,6 +207,7 @@ export function CustomQualForm({
 
 				{/* Industries */}
 				<TagInput
+					id="qualification-industries"
 					label="Industries"
 					placeholder="Fintech, SaaS, Healthcare..."
 					tags={industries}
@@ -209,6 +220,8 @@ export function CustomQualForm({
 						Target Companies
 					</span>
 					<textarea
+						id="qualification-company-urls"
+						name="qualification-company-urls"
 						value={companyUrls}
 						onChange={(e) => setCompanyUrls(e.target.value)}
 						placeholder={
@@ -228,6 +241,8 @@ export function CustomQualForm({
 						Ideal Customer Profile
 					</span>
 					<textarea
+						id="qualification-icp-notes"
+						name="qualification-icp-notes"
 						value={icpNotes}
 						onChange={(e) => setIcpNotes(e.target.value)}
 						placeholder="Describe your ideal prospect. What role, seniority, company stage, or buying signals matter most?"

@@ -38,15 +38,15 @@ function Popup() {
 				const tab = tabs[0];
 				const url = tab?.url;
 				let authResult = storedAuthStatus;
+				let popupError: string | null = null;
 
 				if (!authResult && webAuthStatus?.isAuthenticated) {
-					authResult =
-						(await syncExtensionSessionFromWeb(webAuthStatus.appUrl)) ??
-						webAuthStatus;
-				}
+					authResult = await syncExtensionSessionFromWeb(webAuthStatus.appUrl);
 
-				if (!authResult) {
-					authResult = webAuthStatus;
+					if (!authResult) {
+						popupError =
+							"SalesMAXXing is signed in on the web, but the extension session is still missing. Return to the SalesMAXXing sign-in tab and let it finish syncing.";
+					}
 				}
 
 				setActiveTab({
@@ -56,6 +56,7 @@ function Popup() {
 				});
 
 				setAuthStatus(authResult);
+				setError(popupError);
 			} catch {
 				setError("Could not read the active tab.");
 			} finally {

@@ -112,7 +112,5 @@ function handleExtractConnections(
 		});
 }
 
-// Cleanup on unload (though rarely fires for content scripts)
-window.addEventListener("unload", () => {
-	cleanupNavListener();
-});
+// Content scripts are torn down with the page, so explicit unload cleanup is unnecessary.
+void cleanupNavListener;
