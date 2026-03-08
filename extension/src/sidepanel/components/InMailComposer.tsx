@@ -66,9 +66,18 @@ async function getSession(): Promise<StoredSession | null> {
 
 async function getRepProfile(): Promise<RepProfile> {
 	try {
-		const result = await chrome.storage.local.get("repProfile");
-		if (result.repProfile && typeof result.repProfile === "object") {
-			return result.repProfile as RepProfile;
+		const result = await chrome.storage.local.get("ownProfile");
+		if (result.ownProfile && typeof result.ownProfile === "object") {
+			const p = result.ownProfile as Record<string, unknown>;
+			return {
+				name: typeof p.name === "string" ? p.name : "Sales Rep",
+				headline: typeof p.headline === "string" ? p.headline : null,
+				company: null,
+				about: typeof p.about === "string" ? p.about : null,
+				experience: Array.isArray(p.experience)
+					? (p.experience as RepProfile["experience"])
+					: [],
+			};
 		}
 	} catch {
 		// fallback
