@@ -269,57 +269,57 @@ Key mitigations: dynamic URL in manifest, human-speed interactions, read-only be
 - [x] LinkedIn profile page detection (URL pattern + MutationObserver)
 - [x] DOM data extraction module (name, headline, company, about, experience, education)
 - [x] Resilient selector system (data-*, aria-label, partial class match)
-- [ ] Own-profile extraction (first-run onboarding step)
+- [x] Own-profile extraction (first-run onboarding step)
 - [x] Connections page crawler (scroll + capture, human-speed delays)
 - [x] Message passing to background service worker
 
 ### Chrome Extension — Side Panel UI
 - [x] Side panel registration and shell
-- [ ] Onboarding flow: Automatic vs Custom qualification choice
-- [ ] Custom qualification form (keywords, URLs, ICP notes, industry filters)
-- [ ] Lead card component (score badge, expandable justification, profile highlights)
-- [ ] Lead list view (5-10 cards, ranked by qualification score)
-- [ ] InMail draft view (generated message, edit, copy to clipboard)
-- [ ] Loading/qualification-in-progress state (beautiful animation)
-- [ ] Empty states and error handling
+- [x] Onboarding flow: Automatic vs Custom qualification choice
+- [x] Custom qualification form (keywords, URLs, ICP notes, industry filters)
+- [x] Lead card component (score badge, expandable justification, profile highlights)
+- [x] Lead list view (5-10 cards, ranked by qualification score)
+- [x] InMail draft view (generated message, edit, copy to clipboard)
+- [x] Loading/qualification-in-progress state (beautiful animation)
+- [x] Empty states and error handling
 
 ### Chrome Extension — Background Worker
 - [x] Message routing between content script ↔ side panel
 - [x] Auth token management (read from chrome.storage)
-- [ ] Data caching in chrome.storage.local
-- [ ] Coordination of multi-page extraction (profile + connections)
+- [x] Data caching in chrome.storage.local
+- [x] Coordination of multi-page extraction (profile + connections)
 
 ### AI — Lead Qualification
 - [x] Vercel AI SDK setup with @ai-sdk/anthropic
-- [ ] `/api/qualify` route (auth-gated, rate-limited)
-- [ ] System prompt: sales qualification methodology (BANT, MEDDIC, or custom)
-- [ ] Automatic mode: user profile → infer what they sell → rank connections
-- [ ] Custom mode: user criteria + connections → filtered + ranked results
-- [ ] Response schema: lead name, score, justification, key signals, talking points
-- [ ] Streaming response for real-time UI updates
+- [x] `/api/qualify` route (auth-gated, rate-limited)
+- [x] System prompt: sales qualification methodology (BANT, MEDDIC, or custom)
+- [x] Automatic mode: user profile → infer what they sell → rank connections
+- [x] Custom mode: user criteria + connections → filtered + ranked results
+- [x] Response schema: lead name, score, justification, key signals, talking points
+- [x] Streaming response for real-time UI updates
 
 ### AI — InMail Draft Generation
-- [ ] `/api/generate-intro` route (auth-gated)
-- [ ] System prompt: personalized outreach best practices
-- [ ] Input: rep profile + lead profile + qualification context
-- [ ] Output: ready-to-send InMail with personalization hooks
-- [ ] Tone/style options (warm intro, cold outreach, mutual connection reference)
+- [x] `/api/generate-intro` route (auth-gated)
+- [x] System prompt: personalized outreach best practices
+- [x] Input: rep profile + lead profile + qualification context
+- [x] Output: ready-to-send InMail with personalization hooks
+- [x] Tone/style options (warm intro, cold outreach, mutual connection reference)
 
 ### Database (Supabase)
 - [x] `user_profiles` table (rep meta, job context, value prop, LinkedIn data)
-- [ ] `qualification_configs` table (custom keywords, URLs, ICP, industry)
-- [ ] `leads` table (extracted profile data, score, justification, status)
-- [ ] `intros` table (generated InMails, lead FK, version history)
-- [ ] RLS policies (users only see their own data)
-- [ ] Indexes on leads.user_id, leads.score
+- [x] `qualification_configs` table (custom keywords, URLs, ICP, industry)
+- [x] `leads` table (extracted profile data, score, justification, status)
+- [x] `intros` table (generated InMails, lead FK, version history)
+- [x] RLS policies (users only see their own data)
+- [x] Indexes on leads.user_id, leads.score
 
 ### UI/UX Design
-- [ ] Design language: dark/premium aesthetic that makes Apollo look dated
-- [ ] Side panel: lead card design with score visualization
-- [ ] Side panel: expandable justification with smooth animations
-- [ ] Side panel: InMail composer with real-time AI streaming
-- [ ] Side panel: onboarding screens (auth, mode selection, loading)
-- [ ] Micro-interactions: hover states, transitions, loading skeletons
+- [x] Design language: dark/premium aesthetic that makes Apollo look dated
+- [x] Side panel: lead card design with score visualization
+- [x] Side panel: expandable justification with smooth animations
+- [x] Side panel: InMail composer with real-time AI streaming
+- [x] Side panel: onboarding screens (auth, mode selection, loading)
+- [x] Micro-interactions: hover states, transitions, loading skeletons
 - [x] Extension popup: minimal, branded entry point
 
 ---
@@ -425,12 +425,12 @@ Content script can read profile data and connections from LinkedIn pages.
 - [x] 3.4 — Try JSON-LD extraction first (`<script type="application/ld+json">`)
 - [x] 3.5 — Fall back to DOM selectors (`pv-top-card`, `pvs-list__*`, `data-*`, `aria-label`)
 - [x] 3.6 — Add MutationObserver for SPA navigation (detect page changes)
-- [ ] 3.7 — Extract authenticated user's own profile (navigate to own profile URL)
-- [ ] 3.8 — Save own profile data to chrome.storage + Supabase `user_profiles`
+- [x] 3.7 — Extract authenticated user's own profile (navigate to own profile URL)
+- [x] 3.8 — Save own profile data to chrome.storage + Supabase `user_profiles`
 - [x] 3.9 — Content script: detect connections page, extract connection cards
 - [x] 3.10 — Implement human-speed auto-scroll (randomized 1-3s delays per batch)
 - [x] 3.11 — Capture connections as they scroll (name, headline, profile URL)
-- [ ] 3.12 — Store extracted connections in chrome.storage.local (cache)
+- [x] 3.12 — Store extracted connections in chrome.storage.local (cache)
 - [x] 3.13 — Background worker: coordinate extraction flow (profile → connections)
 - [ ] 3.14 — Verify: load extension, visit LinkedIn, confirm data extraction in devtools
 
@@ -444,12 +444,12 @@ Claude analyzes the user's network and returns ranked leads.
 
 - [x] 4.1 — Install Vercel AI SDK: `bun add ai @ai-sdk/anthropic`
 - [ ] 4.2 — Add ANTHROPIC_API_KEY to Vercel env vars
-- [ ] 4.3 — Build `/api/qualify` route (POST, auth-gated via Supabase session)
-- [ ] 4.4 — Write system prompt: sales qualification (what makes a good lead given the user's role)
-- [ ] 4.5 — Automatic mode: send user profile + connections batch → Claude ranks top 5-10
-- [ ] 4.6 — Custom mode: send user criteria + connections → Claude filters + ranks
-- [ ] 4.7 — Define response schema (name, score 0-100, justification, key signals, talking points)
-- [ ] 4.8 — Implement streaming with Vercel AI SDK `streamText()` for real-time results
+- [x] 4.3 — Build `/api/qualify` route (POST, auth-gated via Supabase session)
+- [x] 4.4 — Write system prompt: sales qualification (what makes a good lead given the user's role)
+- [x] 4.5 — Automatic mode: send user profile + connections batch → Claude ranks top 5-10
+- [x] 4.6 — Custom mode: send user criteria + connections → Claude filters + ranks
+- [x] 4.7 — Define response schema (name, score 0-100, justification, key signals, talking points)
+- [x] 4.8 — Implement streaming with Vercel AI SDK `streamText()` for real-time results
 - [ ] 4.9 — Save qualified leads to Supabase `leads` table
 - [ ] 4.10 — Verify: send test data to API, get back ranked leads with justifications
 
@@ -462,18 +462,18 @@ Claude analyzes the user's network and returns ranked leads.
 The beautiful, always-available side panel that makes this product special.
 
 - [x] 5.1 — Register side panel in manifest.json
-- [ ] 5.2 — Side panel shell: React + Tailwind, dark/premium design language
-- [ ] 5.3 — Onboarding screen 1: "Welcome, [name]" with LinkedIn avatar
-- [ ] 5.4 — Onboarding screen 2: Automatic vs Custom qualification picker
-- [ ] 5.5 — Custom qualification form: keywords, company URLs, ICP notes, industry
-- [ ] 5.6 — Loading state: qualification in progress (animated, shows what's happening)
-- [ ] 5.7 — Lead card component: name, title, company, score badge, connection degree
-- [ ] 5.8 — Lead card expand: full justification, profile highlights, talking points
-- [ ] 5.9 — Lead list view: 5-10 cards, sorted by score, smooth expand/collapse
-- [ ] 5.10 — "View Profile" button: opens LinkedIn profile in main tab
-- [ ] 5.11 — "Refresh" button: re-run qualification with latest data
-- [ ] 5.12 — Empty state: no leads found / extraction in progress
-- [ ] 5.13 — Error states: auth expired, API error, extraction failed
+- [x] 5.2 — Side panel shell: React + Tailwind, dark/premium design language
+- [x] 5.3 — Onboarding screen 1: "Welcome, [name]" with LinkedIn avatar
+- [x] 5.4 — Onboarding screen 2: Automatic vs Custom qualification picker
+- [x] 5.5 — Custom qualification form: keywords, company URLs, ICP notes, industry
+- [x] 5.6 — Loading state: qualification in progress (animated, shows what's happening)
+- [x] 5.7 — Lead card component: name, title, company, score badge, connection degree
+- [x] 5.8 — Lead card expand: full justification, profile highlights, talking points
+- [x] 5.9 — Lead list view: 5-10 cards, sorted by score, smooth expand/collapse
+- [x] 5.10 — "View Profile" button: opens LinkedIn profile in main tab
+- [x] 5.11 — "Refresh" button: re-run qualification with latest data
+- [x] 5.12 — Empty state: no leads found / extraction in progress
+- [x] 5.13 — Error states: auth expired, API error, extraction failed
 - [ ] 5.14 — Verify: full flow from extension click → onboarding → see ranked leads
 
 **Checkpoint: Click extension, choose mode, see beautiful ranked lead cards.**
@@ -485,13 +485,13 @@ The beautiful, always-available side panel that makes this product special.
 One-click personalized message for any qualified lead.
 
 - [x] 6.1 — Build `/api/generate-intro` route (POST, auth-gated)
-- [ ] 6.2 — System prompt: personalized outreach (warm, relevant, not spammy)
-- [ ] 6.3 — Input: rep profile + lead profile + qualification context + tone
-- [ ] 6.4 — Stream response to side panel for real-time draft display
-- [ ] 6.5 — "Draft InMail" button on each lead card
-- [ ] 6.6 — InMail composer view: editable text area with AI-generated draft
-- [ ] 6.7 — Tone selector: professional / casual / mutual connection reference
-- [ ] 6.8 — "Copy to Clipboard" button with confirmation feedback
+- [x] 6.2 — System prompt: personalized outreach (warm, relevant, not spammy)
+- [x] 6.3 — Input: rep profile + lead profile + qualification context + tone
+- [x] 6.4 — Stream response to side panel for real-time draft display
+- [x] 6.5 — "Draft InMail" button on each lead card
+- [x] 6.6 — InMail composer view: editable text area with AI-generated draft
+- [x] 6.7 — Tone selector: professional / casual / mutual connection reference
+- [x] 6.8 — "Copy to Clipboard" button with confirmation feedback
 - [ ] 6.9 — Save generated intros to Supabase `intros` table
 - [ ] 6.10 — Verify: click "Draft InMail" on lead → see personalized message → copy works
 
@@ -503,12 +503,12 @@ One-click personalized message for any qualified lead.
 
 Leads and intros persist across sessions.
 
-- [ ] 7.1 — Create Supabase migrations for all tables
-- [ ] 7.2 — `user_profiles`: id, supabase_auth_id, linkedin_data, job_context, created_at
-- [ ] 7.3 — `qualification_configs`: id, user_id, mode, keywords, urls, icp_notes, industry
-- [ ] 7.4 — `leads`: id, user_id, linkedin_url, profile_data, score, justification, status
-- [ ] 7.5 — `intros`: id, user_id, lead_id, message, tone, version, created_at
-- [ ] 7.6 — RLS policies: users only access their own rows
+- [x] 7.1 — Create Supabase migrations for all tables
+- [x] 7.2 — `user_profiles`: id, supabase_auth_id, linkedin_data, job_context, created_at
+- [x] 7.3 — `qualification_configs`: id, user_id, mode, keywords, urls, icp_notes, industry
+- [x] 7.4 — `leads`: id, user_id, linkedin_url, profile_data, score, justification, status
+- [x] 7.5 — `intros`: id, user_id, lead_id, message, tone, version, created_at
+- [x] 7.6 — RLS policies: users only access their own rows
 - [ ] 7.7 — Build `/api/leads` CRUD routes (GET list, POST save, PATCH status)
 - [ ] 7.8 — Side panel: load saved leads from Supabase on open
 - [ ] 7.9 — Side panel: lead status tracking (new, contacted, replied, qualified)
@@ -523,10 +523,10 @@ Leads and intros persist across sessions.
 Make it beautiful, test it, package it.
 
 - [x] 8.1 — Extension icon set (16, 32, 48, 128px)
-- [ ] 8.2 — Side panel: micro-interactions, hover states, transitions
+- [x] 8.2 — Side panel: micro-interactions, hover states, transitions
 - [ ] 8.3 — Side panel: loading skeletons for all async states
-- [ ] 8.4 — Side panel: score visualization (gradient bar, color-coded badge)
-- [ ] 8.5 — Extension popup: branded, minimal, shows quick status
+- [x] 8.4 — Side panel: score visualization (gradient bar, color-coded badge)
+- [x] 8.5 — Extension popup: branded, minimal, shows quick status
 - [ ] 8.6 — Error boundary for extension crashes
 - [ ] 8.7 — Test on multiple LinkedIn page types (profile, company, search)
 - [ ] 8.8 — Test auth flow end-to-end (fresh install → sign in → qualify → draft)
