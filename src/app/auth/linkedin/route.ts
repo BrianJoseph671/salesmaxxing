@@ -4,6 +4,8 @@ import {
 	getAppUrl,
 	getSafeExtensionId,
 	getSafeRedirectPath,
+	OAUTH_FLOW_COOKIE_NAME,
+	serializePendingOAuthState,
 } from "@/src/lib/supabase/auth";
 
 export async function GET(request: NextRequest) {
@@ -12,11 +14,6 @@ export async function GET(request: NextRequest) {
 	const extensionId = getSafeExtensionId(searchParams.get("extensionId"));
 	const supabase = await createRlsServerClient();
 	const redirectUrl = new URL("/auth/callback", getAppUrl(request.url));
-	redirectUrl.searchParams.set("next", next);
-
-	if (extensionId) {
-		redirectUrl.searchParams.set("extensionId", extensionId);
-	}
 
 	const { data, error } = await supabase.auth.signInWithOAuth({
 		provider: "linkedin_oidc",
@@ -35,5 +32,19 @@ export async function GET(request: NextRequest) {
 		return NextResponse.redirect(errorUrl);
 	}
 
-	return NextResponse.redirect(data.url);
+	const response = NextResponse.redirect(data.url);
+	response.cookies.set({
+		httpOnly: true,
+		maxAge: 60 * 10,
+		name: OAUTH_FLOW_COOKIE_NAME,
+		path: "/",
+		sameSite: "lax",
+		secure: redirectUrl.protocol === "https:",
+		value: serializePendingOAuthState({
+			extensionId,
+			next,
+		}),
+	});
+
+	return response;
 }

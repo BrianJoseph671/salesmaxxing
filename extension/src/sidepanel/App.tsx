@@ -6,6 +6,7 @@ import { InMailComposer } from "./components/InMailComposer";
 import { LeadList } from "./components/LeadList";
 import { LoadingState } from "./components/LoadingState";
 import { ModeSelector } from "./components/ModeSelector";
+import { ProfileSkeleton } from "./components/Skeletons";
 import { WelcomeScreen } from "./components/WelcomeScreen";
 import { useAuth, useLeads, useQualification } from "./hooks";
 import type {
@@ -130,7 +131,7 @@ export function App() {
 	function renderView() {
 		switch (view) {
 			case "loading":
-				return <LoadingState message="Checking your session..." />;
+				return <ProfileSkeleton />;
 
 			case "welcome":
 				if (!user) return null;

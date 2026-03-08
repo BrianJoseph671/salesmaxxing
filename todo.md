@@ -492,7 +492,7 @@ One-click personalized message for any qualified lead.
 - [x] 6.6 — InMail composer view: editable text area with AI-generated draft
 - [x] 6.7 — Tone selector: professional / casual / mutual connection reference
 - [x] 6.8 — "Copy to Clipboard" button with confirmation feedback
-- [ ] 6.9 — Save generated intros to Supabase `intros` table
+- [x] 6.9 — Save generated intros to Supabase `intros` table
 - [ ] 6.10 — Verify: click "Draft InMail" on lead → see personalized message → copy works
 
 **Checkpoint: Full MVP flow complete. Browse → Qualify → Draft → Copy → Send.**
@@ -524,15 +524,15 @@ Make it beautiful, test it, package it.
 
 - [x] 8.1 — Extension icon set (16, 32, 48, 128px)
 - [x] 8.2 — Side panel: micro-interactions, hover states, transitions
-- [ ] 8.3 — Side panel: loading skeletons for all async states
+- [x] 8.3 — Side panel: loading skeletons for all async states
 - [x] 8.4 — Side panel: score visualization (gradient bar, color-coded badge)
 - [x] 8.5 — Extension popup: branded, minimal, shows quick status
-- [ ] 8.6 — Error boundary for extension crashes
+- [x] 8.6 — Error boundary for extension crashes
 - [ ] 8.7 — Test on multiple LinkedIn page types (profile, company, search)
 - [ ] 8.8 — Test auth flow end-to-end (fresh install → sign in → qualify → draft)
-- [ ] 8.9 — Privacy policy page (required for Chrome Web Store)
+- [x] 8.9 — Privacy policy page (required for Chrome Web Store)
 - [ ] 8.10 — Chrome Web Store developer account + listing assets
-- [ ] 8.11 — Web app landing page (what it does, install CTA, screenshots)
+- [x] 8.11 — Web app landing page (what it does, install CTA, screenshots)
 - [ ] 8.12 — Submit to Chrome Web Store (or distribute as unpacked for beta)
 
 **Checkpoint: MVP shipped. Installable, usable, beautiful.**

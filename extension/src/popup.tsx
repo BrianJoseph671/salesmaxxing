@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { ErrorBoundary } from "./sidepanel/components/ErrorBoundary";
 
 const APP_URL = "https://salesmaxxing.vercel.app";
 
@@ -328,5 +329,9 @@ function Popup() {
 
 const root = document.getElementById("root");
 if (root) {
-	createRoot(root).render(<Popup />);
+	createRoot(root).render(
+		<ErrorBoundary>
+			<Popup />
+		</ErrorBoundary>,
+	);
 }

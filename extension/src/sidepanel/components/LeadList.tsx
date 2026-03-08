@@ -3,6 +3,7 @@ import { RefreshCw, SlidersHorizontal, Trophy } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { LeadStatus, QualifiedLead } from "../types";
 import { LeadCard } from "./LeadCard";
+import { LeadListSkeleton } from "./Skeletons";
 
 interface LeadListProps {
 	leads: QualifiedLead[];
@@ -11,6 +12,7 @@ interface LeadListProps {
 	onDraftInMail?: (lead: QualifiedLead) => void;
 	onUpdateStatus?: (leadId: string, status: LeadStatus) => void;
 	isRefreshing?: boolean;
+	isLoading?: boolean;
 }
 
 function openProfile(url: string) {
@@ -24,6 +26,7 @@ export function LeadList({
 	onDraftInMail,
 	onUpdateStatus,
 	isRefreshing = false,
+	isLoading = false,
 }: LeadListProps) {
 	const [expandedId, setExpandedId] = useState<string | null>(null);
 	const [localRefreshing, setLocalRefreshing] = useState(false);
@@ -51,6 +54,10 @@ export function LeadList({
 
 	function handleDraftInMail(lead: QualifiedLead) {
 		onDraftInMail?.(lead);
+	}
+
+	if (isLoading) {
+		return <LeadListSkeleton />;
 	}
 
 	return (

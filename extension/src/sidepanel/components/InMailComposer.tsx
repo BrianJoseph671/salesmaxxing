@@ -167,6 +167,25 @@ export function InMailComposer({ lead, onBack }: InMailComposerProps) {
 					accumulated += decoder.decode(value, { stream: true });
 					setDraft(accumulated);
 				}
+
+				// Fire-and-forget: persist the generated intro to Supabase
+				if (accumulated) {
+					fetch(`${session.appUrl}/api/intros`, {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${session.accessToken}`,
+						},
+						body: JSON.stringify({
+							leadName: lead.name,
+							leadProfileUrl: lead.profileUrl,
+							message: accumulated,
+							tone: selectedTone,
+						}),
+					}).catch(() => {
+						// Silently ignore persistence failures
+					});
+				}
 			} catch (err) {
 				if (err instanceof DOMException && err.name === "AbortError") return;
 				setError(

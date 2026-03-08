@@ -20,6 +20,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
 const verifiedSupabaseUrl: string = supabaseUrl;
 const verifiedSupabaseAnonKey: string = supabaseAnonKey;
 const chromeExtensionIdPattern = /^[a-p]{32}$/;
+export const OAUTH_FLOW_COOKIE_NAME = "salesmaxxing-oauth-state";
+
+type PendingOAuthState = {
+	extensionId: string | null;
+	next: string;
+};
 
 export function getSafeRedirectPath(
 	redirectTo: string | null | undefined,
@@ -57,6 +63,29 @@ export function getSafeExtensionId(extensionId: string | null | undefined) {
 	return chromeExtensionIdPattern.test(trimmedExtensionId)
 		? trimmedExtensionId
 		: null;
+}
+
+export function serializePendingOAuthState(state: PendingOAuthState) {
+	return encodeURIComponent(JSON.stringify(state));
+}
+
+export function parsePendingOAuthState(cookieValue: string | undefined) {
+	if (!cookieValue) {
+		return null;
+	}
+
+	try {
+		const parsed = JSON.parse(
+			decodeURIComponent(cookieValue),
+		) as Partial<PendingOAuthState>;
+
+		return {
+			extensionId: getSafeExtensionId(parsed.extensionId),
+			next: getSafeRedirectPath(parsed.next),
+		};
+	} catch {
+		return null;
+	}
 }
 
 export async function createRlsServerClient() {

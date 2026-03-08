@@ -4,6 +4,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
 	getSafeExtensionId,
 	getSafeRedirectPath,
+	OAUTH_FLOW_COOKIE_NAME,
+	parsePendingOAuthState,
 } from "@/src/lib/supabase/auth";
 import { upsertUserProfile } from "@/src/lib/supabase/user-profiles";
 
@@ -15,9 +17,16 @@ const supabaseAnonKey =
 async function handleCallback(request: NextRequest, code: string | null) {
 	const requestUrl = new URL(request.url);
 	const origin = requestUrl.origin;
-	const next = getSafeRedirectPath(requestUrl.searchParams.get("next"));
+	const cookieStore = await cookies();
+	const pendingOAuthState = parsePendingOAuthState(
+		cookieStore.get(OAUTH_FLOW_COOKIE_NAME)?.value,
+	);
+	const next = getSafeRedirectPath(
+		requestUrl.searchParams.get("next") ?? pendingOAuthState?.next,
+	);
 	const extensionId = getSafeExtensionId(
-		requestUrl.searchParams.get("extensionId"),
+		requestUrl.searchParams.get("extensionId") ??
+			pendingOAuthState?.extensionId,
 	);
 	const forwardedHost = request.headers.get("x-forwarded-host");
 	const isLocalEnv = process.env.NODE_ENV === "development";
@@ -32,12 +41,10 @@ async function handleCallback(request: NextRequest, code: string | null) {
 
 	if (!supabaseUrl || !supabaseAnonKey) {
 		signInUrl.searchParams.set("error", "missing_supabase_config");
-		return NextResponse.redirect(signInUrl);
+		return buildRedirectResponse(signInUrl);
 	}
 
 	if (code) {
-		const cookieStore = await cookies();
-
 		const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
 			cookies: {
 				getAll() {
@@ -65,14 +72,14 @@ async function handleCallback(request: NextRequest, code: string | null) {
 
 			if (userError || !user) {
 				signInUrl.searchParams.set("error", "profile_sync_failed");
-				return NextResponse.redirect(signInUrl);
+				return buildRedirectResponse(signInUrl);
 			}
 
 			try {
 				await upsertUserProfile(supabase, user);
 			} catch {
 				signInUrl.searchParams.set("error", "profile_sync_failed");
-				return NextResponse.redirect(signInUrl);
+				return buildRedirectResponse(signInUrl);
 			}
 
 			if (extensionId) {
@@ -80,15 +87,21 @@ async function handleCallback(request: NextRequest, code: string | null) {
 				extensionBridgeUrl.searchParams.set("extensionId", extensionId);
 				extensionBridgeUrl.searchParams.set("next", next);
 
-				return NextResponse.redirect(extensionBridgeUrl);
+				return buildRedirectResponse(extensionBridgeUrl);
 			}
 
-			return NextResponse.redirect(`${baseUrl}${next}`);
+			return buildRedirectResponse(`${baseUrl}${next}`);
 		}
 	}
 
 	signInUrl.searchParams.set("error", "auth_callback_failed");
-	return NextResponse.redirect(signInUrl);
+	return buildRedirectResponse(signInUrl);
+}
+
+function buildRedirectResponse(url: string | URL) {
+	const response = NextResponse.redirect(url);
+	response.cookies.delete(OAUTH_FLOW_COOKIE_NAME);
+	return response;
 }
 
 export async function GET(request: NextRequest) {
