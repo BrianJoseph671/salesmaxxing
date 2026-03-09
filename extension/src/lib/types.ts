@@ -35,6 +35,7 @@ export type LinkedInConnection = {
 
 // Messages between content script <-> background worker
 export type ExtractProfileMessage = { type: "extract-profile" };
+export type GetOwnProfileUrlMessage = { type: "get-own-profile-url" };
 export type ProfileExtractedMessage = {
 	type: "profile-extracted";
 	profile: LinkedInProfile;
@@ -56,5 +57,6 @@ export type ContentScriptMessage =
 	| ConnectionsExtractedMessage;
 
 export type BackgroundMessage =
+	| GetOwnProfileUrlMessage
 	| ExtractProfileMessage
 	| ExtractConnectionsMessage;

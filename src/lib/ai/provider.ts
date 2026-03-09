@@ -12,6 +12,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { normalizeConfiguredValue } from "@/src/lib/env";
 
 const gatewayApiKey = normalizeConfiguredValue(process.env.AI_GATEWAY_API_KEY);
+const anthropicApiKey = normalizeConfiguredValue(process.env.ANTHROPIC_API_KEY);
 const gatewayBaseURL =
 	normalizeConfiguredValue(process.env.AI_GATEWAY_BASE_URL) ||
 	"https://ai-gateway.vercel.sh/v1";
@@ -32,7 +33,17 @@ const QUALIFY_MODEL_DIRECT = "claude-sonnet-4-20250514";
 const INTRO_MODEL = "anthropic/claude-sonnet-4-20250514";
 const INTRO_MODEL_DIRECT = "claude-sonnet-4-20250514";
 
+function assertAiProviderConfigured() {
+	if (!gatewayProvider && !anthropicApiKey) {
+		throw new Error(
+			"AI provider is not configured. Add AI_GATEWAY_API_KEY or ANTHROPIC_API_KEY in production.",
+		);
+	}
+}
+
 export function getQualifyModel() {
+	assertAiProviderConfigured();
+
 	if (gatewayProvider) {
 		return gatewayProvider(
 			normalizeConfiguredValue(process.env.AI_QUALIFY_MODEL) || QUALIFY_MODEL,
@@ -42,6 +53,8 @@ export function getQualifyModel() {
 }
 
 export function getIntroModel() {
+	assertAiProviderConfigured();
+
 	if (gatewayProvider) {
 		return gatewayProvider(
 			normalizeConfiguredValue(process.env.AI_INTRO_MODEL) || INTRO_MODEL,

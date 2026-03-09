@@ -16,6 +16,7 @@ import type {
 } from "./types";
 
 const HAS_COMPLETED_ONBOARDING_KEY = "salesmaxxing_onboarded";
+const SIGN_IN_URL = "https://salesmaxxing.vercel.app/sign-in?next=/";
 
 function readOnboardingFlag(): boolean {
 	try {
@@ -45,6 +46,12 @@ export function App() {
 	const [view, setView] = useState<SidePanelView>("loading");
 	const [composerLead, setComposerLead] = useState<QualifiedLead | null>(null);
 	const [qualError, setQualError] = useState<string | null>(null);
+	const errorType = !user
+		? "auth-expired"
+		: qualError?.toLowerCase().includes("qualification failed") ||
+				qualError?.toLowerCase().includes("ai provider")
+			? "api-error"
+			: "extraction-failed";
 
 	const handleQualificationComplete = useCallback(
 		(newLeads: QualifiedLead[]) => {
@@ -153,6 +160,10 @@ export function App() {
 		setView("leads");
 	}
 
+	function handleSignIn() {
+		chrome.tabs.create({ url: SIGN_IN_URL });
+	}
+
 	// ── Render ──────────────────────────────────────────────────────────────
 
 	function renderView() {
@@ -207,10 +218,9 @@ export function App() {
 			case "error":
 				return (
 					<ErrorState
-						message={
-							qualError ??
-							"Sign in to SalesMAXXing from the extension popup to get started."
-						}
+						message={qualError ?? "Sign in to SalesMAXXing to get started."}
+						type={errorType}
+						onSignIn={user ? undefined : handleSignIn}
 						onRetry={handleRetry}
 					/>
 				);

@@ -190,11 +190,14 @@ export async function POST(request: NextRequest) {
 			}),
 			"POST,OPTIONS",
 		);
-	} catch {
-		const response = NextResponse.json(
-			{ error: "Failed to generate intro" },
-			{ status: 500 },
-		);
+	} catch (error) {
+		const message =
+			error instanceof Error ? error.message : "Failed to generate intro";
+		const status = message.includes("AI provider is not configured")
+			? 503
+			: 500;
+
+		const response = NextResponse.json({ error: message }, { status });
 		return applyExtensionCors(request, response, "POST,OPTIONS");
 	}
 }

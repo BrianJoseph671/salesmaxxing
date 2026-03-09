@@ -13,12 +13,12 @@ const supabaseAnonKey = normalizeConfiguredValue(
 );
 const appUrl = normalizeConfiguredValue(process.env.NEXT_PUBLIC_APP_URL);
 
-if (!supabaseUrl || !supabaseAnonKey) {
-	throw new Error("Missing Supabase environment variables for auth");
+function getSupabaseConfig() {
+	if (!supabaseUrl || !supabaseAnonKey) {
+		throw new Error("Missing Supabase environment variables for auth");
+	}
+	return { url: supabaseUrl, anonKey: supabaseAnonKey };
 }
-
-const verifiedSupabaseUrl: string = supabaseUrl;
-const verifiedSupabaseAnonKey: string = supabaseAnonKey;
 const chromeExtensionIdPattern = /^[a-p]{32}$/;
 export const OAUTH_FLOW_COOKIE_NAME = "salesmaxxing-oauth-state";
 
@@ -91,32 +91,29 @@ export function parsePendingOAuthState(cookieValue: string | undefined) {
 export async function createRlsServerClient() {
 	const cookieStore = await cookies();
 
-	return createSupabaseServerClient(
-		verifiedSupabaseUrl,
-		verifiedSupabaseAnonKey,
-		{
-			cookies: {
-				getAll() {
-					return cookieStore.getAll();
-				},
-				setAll(
-					cookiesToSet: {
-						name: string;
-						value: string;
-						options?: CookieOptions;
-					}[],
-				) {
-					try {
-						for (const { name, value, options } of cookiesToSet) {
-							cookieStore.set(name, value, options);
-						}
-					} catch {
-						// Ignore server component write attempts. Route handlers and proxy can persist cookies.
+	const { url, anonKey } = getSupabaseConfig();
+	return createSupabaseServerClient(url, anonKey, {
+		cookies: {
+			getAll() {
+				return cookieStore.getAll();
+			},
+			setAll(
+				cookiesToSet: {
+					name: string;
+					value: string;
+					options?: CookieOptions;
+				}[],
+			) {
+				try {
+					for (const { name, value, options } of cookiesToSet) {
+						cookieStore.set(name, value, options);
 					}
-				},
+				} catch {
+					// Ignore server component write attempts. Route handlers and proxy can persist cookies.
+				}
 			},
 		},
-	);
+	});
 }
 
 export async function getUser() {
@@ -142,23 +139,20 @@ export async function getUserFromRequest(request: Request) {
 	const authHeader = request.headers.get("authorization");
 	if (authHeader?.startsWith("Bearer ")) {
 		const token = authHeader.slice(7);
-		const supabase = createSupabaseServerClient(
-			verifiedSupabaseUrl,
-			verifiedSupabaseAnonKey,
-			{
-				cookies: {
-					getAll() {
-						return [];
-					},
-					setAll() {
-						// no-op for token-based auth
-					},
+		const { url, anonKey } = getSupabaseConfig();
+		const supabase = createSupabaseServerClient(url, anonKey, {
+			cookies: {
+				getAll() {
+					return [];
 				},
-				global: {
-					headers: { Authorization: `Bearer ${token}` },
+				setAll() {
+					// no-op for token-based auth
 				},
 			},
-		);
+			global: {
+				headers: { Authorization: `Bearer ${token}` },
+			},
+		});
 		const {
 			data: { user },
 			error,

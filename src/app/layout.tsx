@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-	title: "SalesMAXXing Agent",
+	title: "SalesMAXXing",
 	description:
 		"AI-powered lead qualification from your LinkedIn network. Any rep can qualify with confidence.",
+	metadataBase: new URL("https://salesmaxxing.vercel.app"),
 	openGraph: {
-		title: "SalesMAXXing Agent",
+		title: "SalesMAXXing",
 		description: "AI-powered lead qualification from your LinkedIn network.",
 		images: [{ url: "/logo.png", width: 1080, height: 1080 }],
 	},

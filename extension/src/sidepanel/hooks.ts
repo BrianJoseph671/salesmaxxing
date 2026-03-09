@@ -3,6 +3,7 @@ import { syncExtensionSessionFromWeb } from "../lib/app-auth";
 import {
 	getAuthSession,
 	getConnections,
+	getCurrentPage,
 	getOwnProfile,
 	type StoredAuthSession,
 	saveConnections,
@@ -292,21 +293,46 @@ function generateId(): string {
 	});
 }
 
+function buildFallbackProfile(session: StoredAuthSession): LinkedInProfile {
+	return {
+		name: session.user.name ?? session.user.email ?? "LinkedIn user",
+		headline: null,
+		location: null,
+		about: null,
+		profileUrl: null,
+		avatarUrl: null,
+		connectionDegree: null,
+		experience: [],
+		education: [],
+		skills: [],
+		extractedAt: new Date().toISOString(),
+	};
+}
+
 /** Resolve the user's LinkedIn profile from storage or via content script extraction. */
 async function resolveProfile(
 	onProgress: (msg: string) => void,
+	authSession: StoredAuthSession,
 ): Promise<LinkedInProfile> {
 	onProgress("Loading your profile...");
 	const cached = await getOwnProfile();
 	if (cached) return cached;
 
-	onProgress("Extracting your LinkedIn profile...");
+	const currentPage = await getCurrentPage();
+	onProgress(
+		currentPage?.pageType === "profile"
+			? "Extracting your LinkedIn profile..."
+			: "Opening your LinkedIn profile...",
+	);
 	const response = (await chrome.runtime.sendMessage({
 		type: "request-extract-profile",
 	})) as { profile: LinkedInProfile } | { error: string };
 
 	if ("error" in response) {
-		throw new Error(`Profile extraction failed: ${response.error}`);
+		const fallbackProfile = buildFallbackProfile(authSession);
+		await saveOwnProfile(fallbackProfile);
+		onProgress("Using your account details to continue...");
+		return fallbackProfile;
 	}
 
 	await saveOwnProfile(response.profile);
@@ -321,7 +347,12 @@ async function resolveConnections(
 	const cached = await getConnections();
 	if (cached && cached.length > 0) return cached;
 
-	onProgress("Extracting connections from LinkedIn...");
+	const currentPage = await getCurrentPage();
+	onProgress(
+		currentPage?.pageType === "connections"
+			? "Extracting connections from LinkedIn..."
+			: "Opening your LinkedIn connections page...",
+	);
 	const response = (await chrome.runtime.sendMessage({
 		type: "request-extract-connections",
 	})) as { connections: LinkedInConnection[] } | { error: string };
@@ -381,23 +412,6 @@ interface ApiLead {
 	justification: string;
 	keySignals: string[];
 	talkingPoints: string[];
-}
-
-/** Read a streaming fetch response to completion and return the full text. */
-async function readStream(response: Response): Promise<string> {
-	const reader = response.body?.getReader();
-	if (!reader) throw new Error("No response body received.");
-
-	const decoder = new TextDecoder();
-	let text = "";
-
-	for (;;) {
-		const { done, value } = await reader.read();
-		if (done) break;
-		text += decoder.decode(value, { stream: true });
-	}
-	text += decoder.decode();
-	return text;
 }
 
 /** Map API leads to the side panel QualifiedLead type. */
@@ -486,7 +500,7 @@ export function useQualification(
 				}
 
 				// 2. Resolve profile and connections
-				const profile = await resolveProfile(setProgress);
+				const profile = await resolveProfile(setProgress, authSession);
 				const connections = await resolveConnections(setProgress);
 
 				if (connections.length === 0) {
@@ -518,17 +532,12 @@ export function useQualification(
 					);
 				}
 
-				// 4. Read streaming response and parse
-				setProgress("Receiving AI results...");
-				const fullText = await readStream(response);
-
+				// 4. Read the structured JSON response
 				setProgress("Processing results...");
-				let parsed: { leads: ApiLead[]; summary: string };
-				try {
-					parsed = JSON.parse(fullText);
-				} catch {
-					throw new Error("Failed to parse qualification results.");
-				}
+				const parsed = (await response.json()) as {
+					leads: ApiLead[];
+					summary: string;
+				};
 
 				if (!Array.isArray(parsed.leads) || parsed.leads.length === 0) {
 					await chrome.storage.local.set({ qualifiedLeads: [] });

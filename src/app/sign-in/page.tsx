@@ -8,22 +8,26 @@ type SignInPageProps = {
 
 function getErrorCopy(error?: string) {
 	if (error === "auth_callback_failed") {
-		return "Supabase could not finish the LinkedIn callback.";
+		return "We couldn't complete your LinkedIn sign-in. Please try again.";
 	}
 
 	if (error === "linkedin_oauth_failed") {
-		return "Supabase could not start LinkedIn OAuth.";
+		return "We couldn't start LinkedIn sign-in right now.";
 	}
 
 	if (error === "missing_supabase_config") {
-		return "Missing Supabase configuration in this environment.";
+		return "Sign-in is temporarily unavailable.";
 	}
 
 	if (error === "profile_sync_failed") {
-		return "LinkedIn sign-in succeeded, but profile sync to user_profiles failed.";
+		return "You signed in, but we couldn't finish setting up your account.";
 	}
 
 	return null;
+}
+
+function getReturnLabel(next: string) {
+	return next === "/dashboard" ? "your dashboard" : "SalesMAXXing";
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
@@ -46,19 +50,19 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 		<main className="flex min-h-screen items-center bg-black px-6 py-16 text-white">
 			<div className="mx-auto w-full max-w-xl rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/40">
 				<p className="text-sm uppercase tracking-[0.3em] text-zinc-500">
-					LinkedIn OAuth
+					LinkedIn Sign-In
 				</p>
 				<h1 className="mt-4 text-4xl font-semibold tracking-tight">
 					Sign in to SalesMAXXing
 				</h1>
 				<p className="mt-4 text-base leading-7 text-zinc-400">
-					This flow reuses the existing Supabase auth project for speed while we
-					validate the extension and lead qualification flow in production.
+					Sign in with LinkedIn to connect your account, unlock the Chrome
+					extension, and start ranking the strongest leads in your network.
 				</p>
 				{extensionId ? (
 					<p className="mt-4 text-sm leading-6 text-zinc-500">
-						After LinkedIn returns, SalesMAXXing will sync your session back to
-						the extension and reopen it automatically.
+						After LinkedIn returns, SalesMAXXing will connect your browser
+						session to the extension automatically.
 					</p>
 				) : null}
 				{error ? (
@@ -81,7 +85,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 					</a>
 				</div>
 				<p className="mt-6 text-sm text-zinc-500">
-					After LinkedIn returns, you will land on <code>{next}</code>.
+					After sign-in, you'll return to {getReturnLabel(next)}.
 				</p>
 			</div>
 		</main>

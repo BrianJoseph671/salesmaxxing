@@ -27,6 +27,12 @@ type StoredExtensionSession = {
 };
 
 const allowedExternalOrigins = new Set(["https://salesmaxxing.vercel.app"]);
+const LINKEDIN_CONNECTIONS_URL =
+	"https://www.linkedin.com/mynetwork/invite-connect/connections/";
+const TARGET_LINKEDIN_TAB_ID_KEY = "targetLinkedInTabId";
+const TAB_READY_TIMEOUT_MS = 20000;
+const MESSAGE_RETRY_DELAY_MS = 400;
+const MAX_MESSAGE_ATTEMPTS = 12;
 
 function isExternalAuthMessage(
 	message: unknown,
@@ -110,6 +116,252 @@ type SidePanelMessage = {
 	type: "request-extract-profile" | "request-extract-connections";
 };
 
+type ExtractResponse =
+	| { error: string }
+	| { profile: unknown }
+	| { connections: unknown };
+
+function isLinkedInUrl(url: string | undefined): boolean {
+	return typeof url === "string" && url.includes("linkedin.com");
+}
+
+function isLinkedInProfileUrl(url: string | undefined): boolean {
+	if (!url) {
+		return false;
+	}
+
+	try {
+		return /^\/in\/[^/]+\/?$/.test(new URL(url).pathname);
+	} catch {
+		return false;
+	}
+}
+
+function isLinkedInConnectionsUrl(url: string | undefined): boolean {
+	if (!url) {
+		return false;
+	}
+
+	try {
+		return new URL(url).pathname.startsWith(
+			"/mynetwork/invite-connect/connections/",
+		);
+	} catch {
+		return false;
+	}
+}
+
+function sleep(ms: number): Promise<void> {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
+}
+
+async function setTargetLinkedInTabId(tabId: number | null) {
+	if (typeof tabId === "number") {
+		await chrome.storage.local.set({
+			[TARGET_LINKEDIN_TAB_ID_KEY]: tabId,
+		});
+		return;
+	}
+
+	await chrome.storage.local.remove(TARGET_LINKEDIN_TAB_ID_KEY);
+}
+
+async function getStoredTargetLinkedInTab(): Promise<chrome.tabs.Tab | null> {
+	const result = await chrome.storage.local.get(TARGET_LINKEDIN_TAB_ID_KEY);
+	const tabId: unknown = result[TARGET_LINKEDIN_TAB_ID_KEY];
+
+	if (typeof tabId !== "number") {
+		return null;
+	}
+
+	try {
+		const tab = await chrome.tabs.get(tabId);
+		if (!tab.id || !isLinkedInUrl(tab.url)) {
+			await setTargetLinkedInTabId(null);
+			return null;
+		}
+
+		return tab;
+	} catch {
+		await setTargetLinkedInTabId(null);
+		return null;
+	}
+}
+
+async function getActiveLinkedInTab(): Promise<chrome.tabs.Tab> {
+	const storedTab = await getStoredTargetLinkedInTab();
+	if (storedTab?.id) {
+		return storedTab;
+	}
+
+	const activeTabs = await chrome.tabs.query({
+		active: true,
+		lastFocusedWindow: true,
+	});
+	const activeTab = activeTabs[0];
+
+	if (activeTab?.id && isLinkedInUrl(activeTab.url)) {
+		await setTargetLinkedInTabId(activeTab.id);
+		return activeTab;
+	}
+
+	const linkedinTabs = await chrome.tabs.query({
+		url: ["https://*.linkedin.com/*", "https://linkedin.com/*"],
+	});
+	const fallbackTab = linkedinTabs.find(
+		(tab) => tab.id && isLinkedInUrl(tab.url),
+	);
+	if (fallbackTab?.id) {
+		await setTargetLinkedInTabId(fallbackTab.id);
+		return fallbackTab;
+	}
+
+	if (!activeTab?.id) {
+		throw new Error("No active tab found.");
+	}
+
+	if (!isLinkedInUrl(activeTab.url)) {
+		throw new Error("Open LinkedIn in the current tab and try again.");
+	}
+
+	await setTargetLinkedInTabId(activeTab.id);
+	return activeTab;
+}
+
+async function waitForTabReady(
+	tabId: number,
+	urlCheck: (url: string | undefined) => boolean,
+): Promise<chrome.tabs.Tab> {
+	const existing = await chrome.tabs.get(tabId);
+	if (existing.status === "complete" && urlCheck(existing.url)) {
+		return existing;
+	}
+
+	return new Promise((resolve, reject) => {
+		const timeout = setTimeout(() => {
+			chrome.tabs.onUpdated.removeListener(listener);
+			reject(new Error("Timed out waiting for LinkedIn to load."));
+		}, TAB_READY_TIMEOUT_MS);
+
+		const listener = (
+			updatedTabId: number,
+			changeInfo: chrome.tabs.TabChangeInfo,
+			tab: chrome.tabs.Tab,
+		) => {
+			if (updatedTabId !== tabId) {
+				return;
+			}
+
+			if (changeInfo.status === "complete" && urlCheck(tab.url)) {
+				clearTimeout(timeout);
+				chrome.tabs.onUpdated.removeListener(listener);
+				resolve(tab);
+			}
+		};
+
+		chrome.tabs.onUpdated.addListener(listener);
+	});
+}
+
+async function updateTabAndWait(
+	tabId: number,
+	url: string,
+	urlCheck: (url: string | undefined) => boolean,
+): Promise<chrome.tabs.Tab> {
+	await setTargetLinkedInTabId(tabId);
+	await chrome.tabs.update(tabId, { url });
+	return waitForTabReady(tabId, urlCheck);
+}
+
+async function sendMessageToTabWithRetry<TResponse>(
+	tabId: number,
+	message: { type: string },
+): Promise<TResponse> {
+	let lastError: Error | null = null;
+
+	for (let attempt = 0; attempt < MAX_MESSAGE_ATTEMPTS; attempt += 1) {
+		try {
+			return (await chrome.tabs.sendMessage(tabId, message)) as TResponse;
+		} catch (error) {
+			lastError =
+				error instanceof Error
+					? error
+					: new Error("Content script not responding.");
+			await sleep(MESSAGE_RETRY_DELAY_MS);
+		}
+	}
+
+	throw lastError ?? new Error("Content script not responding.");
+}
+
+async function getOwnProfileUrlFromTab(tabId: number): Promise<string | null> {
+	const response = await sendMessageToTabWithRetry<{
+		profileUrl?: string | null;
+	}>(tabId, { type: "get-own-profile-url" });
+	return typeof response.profileUrl === "string" ? response.profileUrl : null;
+}
+
+async function ensureProfileTab(): Promise<chrome.tabs.Tab> {
+	const tab = await getActiveLinkedInTab();
+	const tabId = tab.id;
+	if (!tabId) {
+		throw new Error("No active LinkedIn tab found.");
+	}
+
+	if (isLinkedInProfileUrl(tab.url)) {
+		return tab;
+	}
+
+	const profileUrl = await getOwnProfileUrlFromTab(tabId);
+	if (!profileUrl) {
+		throw new Error(
+			"Could not find your LinkedIn profile from the current page. Open your LinkedIn feed or profile and try again.",
+		);
+	}
+
+	return updateTabAndWait(tabId, profileUrl, isLinkedInProfileUrl);
+}
+
+async function ensureConnectionsTab(): Promise<chrome.tabs.Tab> {
+	const tab = await getActiveLinkedInTab();
+	const tabId = tab.id;
+	if (!tabId) {
+		throw new Error("No active LinkedIn tab found.");
+	}
+
+	if (isLinkedInConnectionsUrl(tab.url)) {
+		return tab;
+	}
+
+	return updateTabAndWait(
+		tabId,
+		LINKEDIN_CONNECTIONS_URL,
+		isLinkedInConnectionsUrl,
+	);
+}
+
+async function handleSidePanelExtraction(
+	message: SidePanelMessage,
+): Promise<ExtractResponse> {
+	const tab =
+		message.type === "request-extract-profile"
+			? await ensureProfileTab()
+			: await ensureConnectionsTab();
+	const tabId = tab.id;
+	if (!tabId) {
+		throw new Error("No active LinkedIn tab found.");
+	}
+
+	return sendMessageToTabWithRetry<ExtractResponse>(tabId, {
+		type:
+			message.type === "request-extract-profile"
+				? "extract-profile"
+				: "extract-connections",
+	});
+}
+
 function isSidePanelMessage(message: unknown): message is SidePanelMessage {
 	if (!message || typeof message !== "object") {
 		return false;
@@ -133,6 +385,15 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onStartup.addListener(() => {
 	// biome-ignore lint/suspicious/noConsole: service worker boot logging
 	console.log("[SalesMAXXing] Background service worker started");
+});
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+	void (async () => {
+		const result = await chrome.storage.local.get(TARGET_LINKEDIN_TAB_ID_KEY);
+		if (result[TARGET_LINKEDIN_TAB_ID_KEY] === tabId) {
+			await setTargetLinkedInTabId(null);
+		}
+	})();
 });
 
 chrome.runtime.onMessageExternal.addListener(
@@ -208,30 +469,17 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 	// Messages from side panel → forward extraction requests to active LinkedIn tab
 	if (isSidePanelMessage(message)) {
-		const extractType =
-			message.type === "request-extract-profile"
-				? "extract-profile"
-				: "extract-connections";
-
-		void chrome.tabs
-			.query({ active: true, currentWindow: true })
-			.then((tabs) => {
-				const tab = tabs[0];
-				if (!tab?.id) {
-					sendResponse({ error: "No active tab found." });
-					return;
-				}
-
-				void chrome.tabs
-					.sendMessage(tab.id, { type: extractType })
-					.then((response: unknown) => {
-						sendResponse(response);
-					})
-					.catch(() => {
-						sendResponse({
-							error: "Content script not responding.",
-						});
-					});
+		void handleSidePanelExtraction(message)
+			.then((response) => {
+				sendResponse(response);
+			})
+			.catch((error: unknown) => {
+				sendResponse({
+					error:
+						error instanceof Error
+							? error.message
+							: "Could not read the current LinkedIn tab.",
+				});
 			});
 
 		return true; // async response

@@ -24,7 +24,7 @@ export function LoadingState({ message }: LoadingStateProps) {
 	const activeStep = resolveActiveStep(message);
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-full px-8 py-16 animate-fade-in">
+		<div className="flex min-h-full flex-col items-center justify-center px-5 py-10 animate-fade-in">
 			{/* Pulsing orb */}
 			<div className="relative mb-10">
 				<div className="absolute -inset-6 rounded-full bg-white/[0.02] animate-ping-slow" />
@@ -68,17 +68,17 @@ export function LoadingState({ message }: LoadingStateProps) {
 			</div>
 
 			{/* Progress steps */}
-			<div className="flex items-center gap-1.5 mb-8">
+			<div className="mb-8 flex w-full flex-wrap items-center justify-center gap-2">
 				{STEPS.map((step, idx) => {
 					const StepIcon = step.icon;
 					const isActive = idx === activeStep;
 					const isPast = idx < activeStep;
 
 					return (
-						<div key={step.label} className="flex items-center gap-1.5">
+						<div key={step.label} className="flex items-center gap-2">
 							<div
 								className={clsx(
-									"flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-500",
+									"flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 transition-all duration-500",
 									isActive && "bg-white/10 border border-white/10",
 									isPast && "opacity-50",
 									!isActive && !isPast && "opacity-25",
@@ -114,7 +114,7 @@ export function LoadingState({ message }: LoadingStateProps) {
 			</div>
 
 			{/* Current status message */}
-			<p className="text-sm text-zinc-400 text-center leading-relaxed max-w-[260px]">
+			<p className="max-w-[22rem] text-center text-sm leading-relaxed text-zinc-400">
 				{message}
 			</p>
 

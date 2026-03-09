@@ -5,12 +5,14 @@ interface EmptyStateProps {
 }
 
 function handleOpenLinkedIn() {
-	chrome.tabs.create({ url: "https://www.linkedin.com/mynetwork/" });
+	chrome.tabs.create({
+		url: "https://www.linkedin.com/mynetwork/invite-connect/connections/",
+	});
 }
 
 export function EmptyState({ onRequalify }: EmptyStateProps) {
 	return (
-		<div className="flex flex-col items-center justify-center min-h-full px-8 py-16 animate-fade-in">
+		<div className="flex min-h-full flex-col items-center justify-center px-5 py-10 animate-fade-in">
 			{/* Icon */}
 			<div className="relative mb-6">
 				<div className="absolute -inset-3 rounded-2xl bg-white/[0.03] blur-lg" />
@@ -23,13 +25,13 @@ export function EmptyState({ onRequalify }: EmptyStateProps) {
 			<h2 className="text-base font-semibold text-white text-center mb-2">
 				No leads yet
 			</h2>
-			<p className="text-sm text-zinc-400 text-center leading-relaxed max-w-[260px] mb-8">
-				Navigate to LinkedIn and run qualification to surface your top leads
-				from your network.
+			<p className="mb-8 max-w-[22rem] text-center text-sm leading-relaxed text-zinc-400">
+				Open your LinkedIn connections page and run qualification to surface
+				your best-fit leads.
 			</p>
 
 			{/* Actions */}
-			<div className="flex flex-col gap-2.5 w-full max-w-[240px]">
+			<div className="flex w-full flex-col gap-2.5">
 				<button
 					type="button"
 					onClick={onRequalify}
@@ -44,7 +46,7 @@ export function EmptyState({ onRequalify }: EmptyStateProps) {
 					className="flex items-center justify-center gap-2 bg-white/10 text-white font-medium rounded-xl px-5 py-3 hover:bg-white/20 active:bg-white/25 transition-all duration-200 cursor-pointer"
 				>
 					<Globe className="size-4" />
-					Open LinkedIn
+					Open Connections
 				</button>
 			</div>
 		</div>

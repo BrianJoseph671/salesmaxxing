@@ -36,7 +36,7 @@ workflows. Relies on their own 265M+ contact database for enrichment.
 
 ---
 
-## Stack (Shared with yenchat/deathnote)
+## Stack
 
 | Layer | Technology |
 |---|---|
@@ -45,7 +45,7 @@ workflows. Relies on their own 265M+ contact database for enrichment.
 | Styling | Tailwind CSS 4 |
 | Linting | Biome |
 | Package Manager | Bun |
-| Auth | Supabase LinkedIn OIDC (pattern from deathnote) |
+| Auth | Supabase LinkedIn OIDC |
 | Database | Supabase (Postgres) |
 | AI | Vercel AI SDK (`ai` + `@ai-sdk/anthropic`) → Claude |
 | Hosting | Vercel |
@@ -259,7 +259,7 @@ Key mitigations: dynamic URL in manifest, human-speed interactions, read-only be
 - [x] Configure `"use_dynamic_url": true` in manifest web_accessible_resources
 
 ### Auth
-- [x] Implement Supabase LinkedIn OIDC sign-in (port from deathnote)
+- [x] Implement Supabase LinkedIn OIDC sign-in
 - [x] OAuth callback route with redirect back to extension
 - [x] Store user profile meta in Supabase on first login
 - [x] Auth state sync between web app and Chrome extension (cookie-based via /api/auth/status CORS)
@@ -329,7 +329,7 @@ Key mitigations: dynamic URL in manifest, human-speed interactions, read-only be
 - **Content script over LinkedIn API**: Richer data, no partner approval needed,
   works immediately. Proven by Apollo, Lusha, and others at scale.
 - **Vercel AI SDK + Claude**: Unified interface, Claude subscription via Vercel.
-  Pattern proven in deathnote. Use `@ai-sdk/anthropic` directly.
+  Use `@ai-sdk/anthropic` directly.
 - **Side panel over popup**: Always visible while browsing, persistent state,
   room for rich lead cards. Same pattern Apollo uses.
 - **Connections page as primary data source**: Avoids commercial search limits.
@@ -355,18 +355,6 @@ Key mitigations: dynamic URL in manifest, human-speed interactions, read-only be
 
 ---
 
-## Reference Implementations
-
-| Pattern | Source Project | Key Files |
-|---|---|---|
-| LinkedIn OIDC auth | deathnote | `src/app/sign-in/actions.ts`, `src/app/auth/callback/route.ts` |
-| Supabase client setup | deathnote | `src/lib/supabase/auth.ts`, `src/lib/supabase/hooks.ts` |
-| Vercel AI SDK + gateway | deathnote | `src/app/api/generate-eulogy/route.ts` |
-| User profile extraction | deathnote | `src/lib/auth.ts` |
-| Vercel deployment config | yenchat | `vercel.json` |
-| Biome config | yenchat | `biome.json` |
-| Competitive reference | Apollo.io | Chrome extension side panel pattern |
-
 ---
 
 ## Implementation Checklist
@@ -381,7 +369,7 @@ Complete each milestone fully before moving to the next.
 Get the monorepo structure running with both the web app and extension building.
 
 - [x] 1.1 — `bun create next-app` with TypeScript, Tailwind 4, App Router
-- [x] 1.2 — Add Biome config (port from yenchat)
+- [x] 1.2 — Add Biome config
 - [x] 1.3 — Create `/extension` directory for Chrome extension source
 - [x] 1.4 — Write `extension/manifest.json` (Manifest V3, `use_dynamic_url: true`)
 - [x] 1.5 — Create minimal extension popup (HTML + React shell)
@@ -402,8 +390,8 @@ User can sign in with LinkedIn and the extension knows who they are.
 - [x] 2.1 — Set up Supabase project (or reuse existing, decide now)
 - [x] 2.2 — Enable LinkedIn OIDC provider in Supabase dashboard
 - [x] 2.3 — Add env vars to Vercel (SUPABASE_URL, SUPABASE_ANON_KEY, APP_URL)
-- [x] 2.4 — Port Supabase client setup from deathnote (`lib/supabase/`)
-- [x] 2.5 — Build `/auth/callback` route (port from deathnote)
+- [x] 2.4 — Supabase client setup (`lib/supabase/`)
+- [x] 2.5 — Build `/auth/callback` route
 - [x] 2.6 — Build sign-in page with "Sign in with LinkedIn" button
 - [x] 2.7 — Store LinkedIn profile meta in `user_profiles` table on first login
 - [x] 2.8 — Extension popup: detect auth state (check Supabase session via web app)

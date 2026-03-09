@@ -1,4 +1,4 @@
-import { Output, streamText } from "ai";
+import { generateObject } from "ai";
 import { type NextRequest, NextResponse } from "next/server";
 import {
 	getAutomaticQualificationPrompt,
@@ -81,31 +81,29 @@ export async function POST(request: NextRequest) {
 
 		const userMessage = formatConnectionsList(data);
 
-		const result = streamText({
+		const result = await generateObject({
 			model: getQualifyModel(),
 			system: systemPrompt,
 			prompt: userMessage,
-			output: Output.object({ schema: qualifyResponseSchema }),
+			schema: qualifyResponseSchema,
 			temperature: 0.3,
 		});
 
-		const streamResponse = result.toTextStreamResponse();
+		return applyExtensionCors(
+			request,
+			NextResponse.json(result.object),
+			"POST,OPTIONS",
+		);
+	} catch (error) {
+		const message =
+			error instanceof Error ? error.message : "Failed to qualify connections";
+		const status = message.includes("AI provider is not configured")
+			? 503
+			: 500;
 
 		return applyExtensionCors(
 			request,
-			new NextResponse(streamResponse.body, {
-				status: streamResponse.status,
-				headers: streamResponse.headers,
-			}),
-			"POST,OPTIONS",
-		);
-	} catch {
-		return applyExtensionCors(
-			request,
-			NextResponse.json(
-				{ error: "Failed to qualify connections" },
-				{ status: 500 },
-			),
+			NextResponse.json({ error: message }, { status }),
 			"POST,OPTIONS",
 		);
 	}
